@@ -1,0 +1,54 @@
+name: Build VitaCast VPK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup VitaSDK
+      run: |
+        git clone https://github.com/vitasdk/vita-headers.git
+        git clone https://github.com/vitasdk/vdpm.git
+        export VITASDK=/usr/local/vitasdk
+        export PATH=$VITASDK/bin:$PATH
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake git wget
+        
+    - name: Install VitaSDK
+      run: |
+        export VITASDK=/usr/local/vitasdk
+        export PATH=$VITASDK/bin:$PATH
+        wget -q https://github.com/vitasdk/autobuilds/releases/download/master-linux-v1200/vitasdk-x86_64-linux-gnu-2022-06-08_12-10-10.tar.bz2
+        sudo tar -xf vitasdk-x86_64-linux-gnu-2022-06-08_12-10-10.tar.bz2 -C /usr/local/
+        echo "VITASDK=/usr/local/vitasdk" >> $GITHUB_ENV
+        echo "/usr/local/vitasdk/bin" >> $GITHUB_PATH
+        
+    - name: Install dependencies
+      run: |
+        export VITASDK=/usr/local/vitasdk
+        export PATH=$VITASDK/bin:$PATH
+        sudo apt-get update
+        sudo apt-get install -y libcurl4-openssl-dev libjson-c-dev
+        
+    - name: Build VitaCast
+      run: |
+        export VITASDK=/usr/local/vitasdk
+        export PATH=$VITASDK/bin:$PATH
+        make clean
+        make
+        
+    - name: Upload VPK artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: VitaCast-VPK
+        path: VitaCast.vpk
