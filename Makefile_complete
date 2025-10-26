@@ -1,7 +1,7 @@
 TARGET = VitaCast
-OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o vita2d_stub.o
+OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o
 
-LIBS = -lSceCtrl_stub -lcurl -lssl -lcrypto -lz -lm
+LIBS = -lvita2d_vgl -lvitaGL -lTinyGL -lmathneon -lSceShaccCgExt -lSceGxm_stub -lSceDisplay_stub -lSceCommonDialog_stub -lSceSysmodule_stub -lSceAppMgr_stub -lSceCtrl_stub -lSceNet_stub -lSceNetCtl_stub -lSceIofilemgr_stub -lSceLibKernel_stub -lSceDmacmgrForDriver_stub -lSceSsl_stub -lcurl -lssl -lcrypto -lpng16 -lfreetype -lz -lm
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc

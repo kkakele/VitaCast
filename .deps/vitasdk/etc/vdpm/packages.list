@@ -250,3 +250,51 @@ ssl/misc/CA.sh
 ssl/misc/c_info
 ssl/misc/c_issuer
 
+PACKAGE vitaGL
+include/
+include/vitaGL.h
+lib/
+lib/libvitaGL.a
+
+PACKAGE libvita2d_vgl
+include/
+include/vita2d_vgl.h
+lib/
+lib/libvita2d_vgl.a
+
+PACKAGE libvita2d_ext
+include/
+include/vita2d_ext.h
+lib/
+lib/libvita2d_ext.a
+
+PACKAGE TinyGL
+include/
+include/GLView.h
+include/GL/
+include/GL/gl.h
+include/GL/nglx.h
+include/GL/glx.h
+include/GL/vgl.h
+include/GL/oscontext.h
+lib/
+lib/libTinyGL.a
+
+PACKAGE vitaShaRK
+include/
+include/vitashark.h
+lib/
+lib/libvitashark.a
+
+PACKAGE SceShaccCgExt
+include/
+include/shacccg_ext.h
+lib/
+lib/libSceShaccCgExt.a
+
+PACKAGE libmathneon
+include/
+include/math_neon.h
+lib/
+lib/libmathneon.a
+
