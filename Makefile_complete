@@ -1,0 +1,90 @@
+TARGET = VitaCast
+OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o
+
+LIBS = -lSceDisplay_stub -lSceCtrl_stub -lSceAudioout_stub -lSceAtrac_stub -lSceNet_stub -lSceNetCtl_stub -lSceIo_stub -lSceKernel_stub -lcurl -lvita2d
+
+PREFIX = arm-vita-eabi
+CC = $(PREFIX)-gcc
+CFLAGS = -Wl,-q -Wall -O2 -std=c99 -I. -Iui -Iaudio -Inetwork -Iapple
+
+# Include directories
+INCLUDES = -I. -Iui -Iaudio -Inetwork -Iapple
+
+# Source directories
+UI_DIR = ui
+AUDIO_DIR = audio
+NETWORK_DIR = network
+APPLE_DIR = apple
+
+all: $(TARGET).vpk
+
+$(TARGET).vpk: eboot.bin
+	vita-mksfoex -s TITLE_ID=VITACAST01 -s APP_VER=01.00 -s CONTENT_ID=PCSE00001 "$(TARGET)" param.sfo
+	vita-pack-vpk -s param.sfo -b eboot.bin $(TARGET).vpk
+
+eboot.bin: $(OBJS)
+	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+
+# Main source
+main.o: main.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+# UI Manager
+ui/ui_manager.o: ui/ui_manager.c ui/ui_manager.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+# Audio Player
+audio/audio_player.o: audio/audio_player.c audio/audio_player.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+# ATRAC Decoder
+audio/atrac_decoder.o: audio/atrac_decoder.c audio/atrac_decoder.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+# Network Manager
+network/network_manager.o: network/network_manager.c network/network_manager.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+# Apple Sync
+apple/apple_sync.o: apple/apple_sync.c apple/apple_sync.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+# Clean target
+clean:
+	rm -rf $(TARGET).vpk eboot.bin param.sfo $(OBJS)
+	rm -rf ui/*.o audio/*.o network/*.o apple/*.o
+
+# Install target (for development)
+install: $(TARGET).vpk
+	vita-install-vpk $(TARGET).vpk
+
+# Debug build
+debug: CFLAGS += -g -DDEBUG
+debug: $(TARGET).vpk
+
+# Release build
+release: CFLAGS += -O3 -DNDEBUG
+release: $(TARGET).vpk
+
+# Help target
+help:
+	@echo "VitaCast Build System"
+	@echo "====================="
+	@echo "Available targets:"
+	@echo "  all      - Build the complete VitaCast VPK"
+	@echo "  debug    - Build with debug symbols"
+	@echo "  release  - Build optimized release version"
+	@echo "  clean    - Clean all build artifacts"
+	@echo "  install  - Install VPK to Vita (requires vita-install-vpk)"
+	@echo "  help     - Show this help message"
+	@echo ""
+	@echo "Features:"
+	@echo "  - PS Vita Music App inspired UI"
+	@echo "  - Apple Music integration"
+	@echo "  - iCloud synchronization"
+	@echo "  - Podcast search and download"
+	@echo "  - Multiple audio format support (MP3, AAC, OGG, WAV, M4A)"
+	@echo "  - Sony ATRAC3/ATRAC3plus support"
+	@echo "  - Offline playback"
+
+.PHONY: clean install debug release help all

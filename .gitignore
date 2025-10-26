@@ -1,0 +1,65 @@
+# VitaCast - PlayStation Vita Podcast & Music App
+# Git ignore file
+
+# Compiled binaries
+*.o
+*.bin
+eboot.bin
+
+# VPK files (keep only the final ones)
+*.vpk
+!VitaCast-Functional.vpk
+!VitaCast-Final-v2.0.vpk
+
+# Temporary files
+temp_*
+*.tmp
+*.temp
+
+# Build artifacts
+*.elf
+*.so
+*.a
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Cache directories
+cache/
+downloads/
+
+# Personal data (don't commit user data)
+data/
+storage/
+
+# Backup files
+*.bak
+*.backup
+
+# PowerShell scripts (keep only essential ones)
+build_*.ps1
+!build_final.ps1
+
+# Keep important files
+!README.md
+!Makefile_complete
+!setup_vitacast.sh
+!*.h
+!*.c
+!assets/
+!ui/
+!audio/
+!network/
+!apple/

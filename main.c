@@ -10,15 +10,7 @@
 #include "apple/apple_sync.h"
 
 #define APP_TITLE "VitaCast"
-#define APP_VERSION "1.0.0"
-
-typedef enum {
-    APP_STATE_MAIN_MENU,
-    APP_STATE_PODCASTS,
-    APP_STATE_MUSIC,
-    APP_STATE_PLAYER,
-    APP_STATE_SETTINGS
-} app_state_t;
+#define APP_VERSION "2.0.0"
 
 typedef struct {
     app_state_t current_state;
@@ -103,6 +95,12 @@ static void vita_cast_render() {
             break;
         case APP_STATE_SETTINGS:
             ui_manager_render_settings(app->ui_manager);
+            break;
+        case APP_STATE_SEARCH:
+            ui_manager_render_search(app->ui_manager);
+            break;
+        case APP_STATE_DOWNLOADS:
+            ui_manager_render_downloads(app->ui_manager);
             break;
     }
     
