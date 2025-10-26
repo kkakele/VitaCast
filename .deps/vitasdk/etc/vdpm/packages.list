@@ -298,3 +298,22 @@ include/math_neon.h
 lib/
 lib/libmathneon.a
 
+PACKAGE taihen
+include/
+include/taihen.h
+lib/
+lib/libtaihenForKernel_stub.a
+lib/libtaihen_stub.a
+lib/libtaihenModuleUtils_stub.a
+lib/libtaihen_stub_weak.a
+
+PACKAGE taipool
+include/
+include/taipool.h
+lib/
+lib/libtaipool.a
+
+PACKAGE henkaku
+lib/
+lib/libHENkaku_stub.a
+
