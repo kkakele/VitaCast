@@ -1,10 +1,6 @@
 name: Build VitaCast VPK
 
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -15,46 +11,25 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
       
-    - name: Install dependencies
+    - name: Setup VitaSDK
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake git wget curl libcurl4-openssl-dev libjson-c-dev
-        
-    - name: Install VitaSDK
-      run: |
-        wget -q https://github.com/vitasdk/autobuilds/releases/download/master-linux-v1200/vitasdk-x86_64-linux-gnu-2022-06-08_12-10-10.tar.bz2
+        sudo apt-get install -y build-essential wget
+        wget https://github.com/vitasdk/autobuilds/releases/download/master-linux-v1200/vitasdk-x86_64-linux-gnu-2022-06-08_12-10-10.tar.bz2
         sudo tar -xf vitasdk-x86_64-linux-gnu-2022-06-08_12-10-10.tar.bz2 -C /usr/local/
-        export VITASDK=/usr/local/vitasdk
-        export PATH=$VITASDK/bin:$PATH
         echo "VITASDK=/usr/local/vitasdk" >> $GITHUB_ENV
         echo "/usr/local/vitasdk/bin" >> $GITHUB_PATH
-        # Verificar instalación
-        ls -la /usr/local/vitasdk/bin/
-        /usr/local/vitasdk/bin/arm-vita-eabi-gcc --version
         
-    - name: Extract and Build VitaCast
+    - name: Build
       run: |
         export VITASDK=/usr/local/vitasdk
         export PATH=$VITASDK/bin:$PATH
-        # Listar archivos para debug
         ls -la
-        # Si hay ZIP, extraerlo
-        if [ -f "VitaCast-Complete-Project.zip" ]; then
-          unzip VitaCast-Complete-Project.zip
-          ls -la VitaCast-Complete-Project/
-          cd VitaCast-Complete-Project
-        fi
-        # Verificar Makefile
-        ls -la Makefile
-        cat Makefile
-        # Compilar
         make clean
         make
         
-    - name: Upload VPK artifact
+    - name: Upload VPK
       uses: actions/upload-artifact@v3
       with:
         name: VitaCast-VPK
-        path: |
-          VitaCast.vpk
-          VitaCast-Complete-Project/VitaCast.vpk
+        path: VitaCast.vpk
