@@ -1,7 +1,7 @@
 TARGET = VitaCast
-OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o
+OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o vita2d_stub.o
 
-LIBS = -lSceDisplay_stub -lSceCtrl_stub -lSceAudioout_stub -lSceAtrac_stub -lSceNet_stub -lSceNetCtl_stub -lSceIo_stub -lSceKernel_stub -lcurl -lvita2d
+LIBS = -lSceCtrl_stub -lcurl -lssl -lcrypto -lz -lm
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
@@ -23,7 +23,7 @@ $(TARGET).vpk: eboot.bin
 	vita-pack-vpk -s param.sfo -b eboot.bin $(TARGET).vpk
 
 eboot.bin: $(OBJS)
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+	$(CC) $(CFLAGS) $^ -Wl,--start-group $(LIBS) -Wl,--end-group -o $@
 
 # Main source
 main.o: main.c
