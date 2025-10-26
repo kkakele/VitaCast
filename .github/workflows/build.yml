@@ -15,35 +15,39 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
       
-    - name: Setup VitaSDK
+    - name: Install dependencies
       run: |
-        git clone https://github.com/vitasdk/vita-headers.git
-        git clone https://github.com/vitasdk/vdpm.git
-        export VITASDK=/usr/local/vitasdk
-        export PATH=$VITASDK/bin:$PATH
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake git wget
+        sudo apt-get install -y build-essential cmake git wget curl libcurl4-openssl-dev libjson-c-dev
         
     - name: Install VitaSDK
       run: |
-        export VITASDK=/usr/local/vitasdk
-        export PATH=$VITASDK/bin:$PATH
         wget -q https://github.com/vitasdk/autobuilds/releases/download/master-linux-v1200/vitasdk-x86_64-linux-gnu-2022-06-08_12-10-10.tar.bz2
         sudo tar -xf vitasdk-x86_64-linux-gnu-2022-06-08_12-10-10.tar.bz2 -C /usr/local/
+        export VITASDK=/usr/local/vitasdk
+        export PATH=$VITASDK/bin:$PATH
         echo "VITASDK=/usr/local/vitasdk" >> $GITHUB_ENV
         echo "/usr/local/vitasdk/bin" >> $GITHUB_PATH
+        # Verificar instalación
+        ls -la /usr/local/vitasdk/bin/
+        /usr/local/vitasdk/bin/arm-vita-eabi-gcc --version
         
-    - name: Install dependencies
+    - name: Extract and Build VitaCast
       run: |
         export VITASDK=/usr/local/vitasdk
         export PATH=$VITASDK/bin:$PATH
-        sudo apt-get update
-        sudo apt-get install -y libcurl4-openssl-dev libjson-c-dev
-        
-    - name: Build VitaCast
-      run: |
-        export VITASDK=/usr/local/vitasdk
-        export PATH=$VITASDK/bin:$PATH
+        # Listar archivos para debug
+        ls -la
+        # Si hay ZIP, extraerlo
+        if [ -f "VitaCast-Complete-Project.zip" ]; then
+          unzip VitaCast-Complete-Project.zip
+          ls -la VitaCast-Complete-Project/
+          cd VitaCast-Complete-Project
+        fi
+        # Verificar Makefile
+        ls -la Makefile
+        cat Makefile
+        # Compilar
         make clean
         make
         
@@ -51,4 +55,6 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: VitaCast-VPK
-        path: VitaCast.vpk
+        path: |
+          VitaCast.vpk
+          VitaCast-Complete-Project/VitaCast.vpk
