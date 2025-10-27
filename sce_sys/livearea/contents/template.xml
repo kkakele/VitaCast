@@ -1,8 +1,8 @@
 <?xml version=1.0 encoding=utf-8?>
 <livearea>
-  <liveareaBackground>
-    <image>bg.png</image>
-  </liveareaBackground>
+  <livearea-background>
+    <image>bg0.png</image>
+  </livearea-background>
   <gate>
     <frame id=frame1>
       <liveitem>

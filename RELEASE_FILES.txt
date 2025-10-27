@@ -4,3 +4,4 @@ VitaCast-compat.vpk 1626709 bytes
 VitaCast-compat.vpk 1626591 bytes
 VitaCast-compat2.vpk 1626669 bytes
 VitaCast-final.vpk 1634827 bytes
+VitaCast-installfix.vpk 1634514 bytes
