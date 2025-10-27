@@ -1,12 +1,12 @@
 <?xml version=1.0 encoding=utf-8?>
 <livearea>
-  <livearea-background>
+  <liveareaBackground>
     <image>bg.png</image>
-  </livearea-background>
+  </liveareaBackground>
   <gate>
     <frame id=frame1>
       <liveitem>
-        <image>bg.png</image>
+        <image>startup.png</image>
       </liveitem>
     </frame>
   </gate>
