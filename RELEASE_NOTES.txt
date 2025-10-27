@@ -1,5 +1,21 @@
-VitaCast 2.0.0
+VitaCast 2.0.0 (FINAL)
 
-- Render vitaGL/vita2d_vgl habilitado
-- Librerías: curl + SSL, PNG, FreeType
-- Stubs internos ui/audio/network/apple incluidos
+- VPK final listo para PS Vita
+- Motor gráfico: vitaGL/vita2d_vgl (con LiveArea mínimo)
+- Compatibilidad mejorada de instalación (SFO estándar)
+
+Instalación
+1) Copia VitaCast.vpk a la Vita
+2) Entra a HENkaku Settings y activa "Enable Unsafe Homebrew"
+3) En VitaShell instala VitaCast.vpk
+4) Si falla: borra ux0:app/VCAST2000 y ux0:patch/VCAST2000, reinicia e intenta de nuevo
+
+Metadatos
+- TITLE_ID: VCAST2000
+- CONTENT_ID: UP1000-VCAST2000_00-0000000000000000
+- CATEGORY: gd
+- SYSTEM_VER: 03.600000
+- APP_VER: 01.00
+
+Checksum
+- SHA-256 (VitaCast.vpk): 0cb284bc814052588382c7ee09d1b710147bf8f05823ce4a8ae5ba9196ce0f58
