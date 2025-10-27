@@ -1,0 +1,9 @@
+stdio_test:
+  attributes: 0
+  process_image: true
+  imagemodule: false
+  version:
+    major: 1
+    minor: 1
+  main:
+    start: module_start
