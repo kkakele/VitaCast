@@ -1,0 +1,5 @@
+VitaCast 2.0.0
+
+- Render vitaGL/vita2d_vgl habilitado
+- Librerías: curl + SSL, PNG, FreeType
+- Stubs internos ui/audio/network/apple incluidos
