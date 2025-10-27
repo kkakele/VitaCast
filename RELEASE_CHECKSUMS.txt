@@ -1,2 +1,3 @@
 271001a9b13dfaf6f2668104ee04e5b7160039355bdfc67d82c6e3bf2ce9be17  VitaCast.vpk
 0281515e9af15af0dc50adeeb6cbd86058c3b3a980bc6e4b7d5d3cfbac64924e  VitaCast-compat.vpk
+03295ea4ef8c57e3bb46b5ae7d5e453e498dd2c907aa18efc9dd3cd8ffdbf0bb  VitaCast-compat.vpk
