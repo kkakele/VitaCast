@@ -1,2 +1,3 @@
 VitaCast.vpk 1625932 bytes
 eboot.bin 3714892 bytes
+VitaCast-compat.vpk 1626709 bytes

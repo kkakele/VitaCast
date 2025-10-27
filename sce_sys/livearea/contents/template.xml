@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<livearea>
+  <livearea-background>
+    <image>bg.png</image>
+  </livearea-background>
+  <gate>
+    <frame id="frame1">
+      <liveitem>
+        <image>bg.png</image>
+      </liveitem>
+    </frame>
+  </gate>
+</livearea>
