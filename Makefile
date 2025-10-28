@@ -5,7 +5,7 @@ LIBS = -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCtrl_stub
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
-CFLAGS = -Wl,-q -Wall -O2 -std=c99 -I. -Iui -Iaudio -Inetwork -Iapple
+CFLAGS = -Wl,-q -Wall -O2 -std=gnu99 -I. -Iui -Iaudio -Inetwork -Iapple
 
 # VPK metadata (TITLE_ID must be exactly 9 chars)
 TITLE_ID = VCST00001
