@@ -1,10 +1,7 @@
 TARGET = VitaCast
-OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o vita2d_stub.o
+OBJS = main_final.o
 
-VSDKLIB ?= $(VITASDK)/arm-vita-eabi/lib
-LIBS = -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCommonDialog_stub -lSceSysmodule_stub \
-  -lSceCtrl_stub -lSceNet_stub -lSceNetCtl_stub -lSceIofilemgr_stub -lSceLibKernel_stub \
-  -lSceSsl_stub -lcurl -lssl -lcrypto -lpng -lz -lm
+LIBS = -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCtrl_stub
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
@@ -43,25 +40,7 @@ $(TARGET).velf: $(TARGET).elf
 $(TARGET).elf: $(OBJS)
 	$(CC) $(CFLAGS) $^ -Wl,--start-group $(LIBS) -Wl,--end-group -o $@
 
-main.o: main.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-ui/ui_manager.o: ui/ui_manager.c ui/ui_manager.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
-audio/audio_player.o: audio/audio_player.c audio/audio_player.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
-audio/atrac_decoder.o: audio/atrac_decoder.c audio/atrac_decoder.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
-network/network_manager.o: network/network_manager.c network/network_manager.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
-apple/apple_sync.o: apple/apple_sync.c apple/apple_sync.h
-	$(CC) $(CFLAGS) -c $< -o $@
-
-vita2d_stub.o: vita2d_stub.c
+main_final.o: main_final.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
