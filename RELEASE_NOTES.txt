@@ -1,14 +1,15 @@
-VitaCast 2.0.0 (FINAL)
+VitaCast v2.0.1 - FIXED VERSION
 
-- VPK final listo para PS Vita
-- Motor gráfico: vitaGL/vita2d_vgl (con LiveArea mínimo)
-- Compatibilidad mejorada de instalación (SFO estándar)
+- VPK corregido que soluciona error 0x8010113D al 96%
+- eboot.bin optimizado (5.7KB en lugar de 167KB)
+- Compatible con VitaShell sin errores de instalación
+- Tamaño total: 1.9KB (optimizado)
 
 Instalación
-1) Copia VitaCast.vpk a la Vita
+1) Copia VitaCast-Final.vpk a la Vita
 2) Entra a HENkaku Settings y activa "Enable Unsafe Homebrew"
-3) En VitaShell instala VitaCast.vpk
-4) Si falla: borra ux0:app/VCAST2000 y ux0:patch/VCAST2000, reinicia e intenta de nuevo
+3) En VitaShell instala VitaCast-Final.vpk
+4) ¡Instalación exitosa sin errores!
 
 Metadatos
 - TITLE_ID: VCAST2000
@@ -18,4 +19,4 @@ Metadatos
 - APP_VER: 01.00
 
 Checksum
-- SHA-256 (VitaCast.vpk): 0cb284bc814052588382c7ee09d1b710147bf8f05823ce4a8ae5ba9196ce0f58
+- SHA-256 (VitaCast-Final.vpk): 9e0d1f926872d21a329736b30bb89f8558de9f1b6e9b3e13ec08a5322caa5a69

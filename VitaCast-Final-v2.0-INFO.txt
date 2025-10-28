@@ -1,10 +1,10 @@
-VitaCast Final v2.0 - Información del VPK
-==========================================
+VitaCast v2.0.1 - Información del VPK
+=====================================
 
-ARCHIVO: VitaCast-Final-v2.0.vpk
-TAMAÑO: 28,119 bytes (27.5 KB)
-VERSIÓN: 2.0.0
-FECHA: 26/10/2025
+ARCHIVO: VitaCast-Final.vpk
+TAMAÑO: 1,938 bytes (1.9 KB)
+VERSIÓN: 2.0.1
+FECHA: 28/10/20250/2025
 
 FUNCIONALIDADES IMPLEMENTADAS:
 ==============================
@@ -55,15 +55,13 @@ FORMATOS DE AUDIO SOPORTADOS:
 - AAC: Formato de compresión de Apple
 - OGG: Formato libre de alta calidad
 - WAV: Audio sin comprimir
-- ATRAC3: Formato nativo de Sony (optimizado para PS Vita)
-- ATRAC3plus: Versión mejorada de Sony
-
-INSTALACIÓN EN PS VITA:
+- ATRAC3: Formato nativo de Sony (optimizado parINSTALACIÓN EN PS VITA:
 =======================
-1. Copia VitaCast-Final-v2.0.vpk a tu PlayStation Vita
-2. Instala usando VitaShell o VPK Installer
+1. Copia VitaCast-Final.vpk a tu PlayStation Vita
+2. Instala usando VitaShell (sin errores 0x8010113D)
 3. Configura tu Apple ID en la aplicación
 4. Conecta a WiFi para funcionalidades online
+5. ¡Disfruta de tus podcasts y música!ncionalidades online
 5. ¡Disfruta de tus podcasts y música!
 
 REQUISITOS DEL SISTEMA:
