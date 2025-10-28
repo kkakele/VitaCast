@@ -1,11 +1,14 @@
 TARGET = VitaCast
-OBJS = main_simple.o
+OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o vita2d_stub.o
 
-LIBS = -lSceDisplay_stub -lSceCtrl_stub
+VSDKLIB ?= $(VITASDK)/arm-vita-eabi/lib
+LIBS = -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCommonDialog_stub -lSceSysmodule_stub \
+  -lSceCtrl_stub -lSceNet_stub -lSceNetCtl_stub -lSceIofilemgr_stub -lSceLibKernel_stub \
+  -lSceSsl_stub -lcurl -lssl -lcrypto -lpng -lz -lm
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
-CFLAGS = -Wl,-q -Wall -O2 -std=c99
+CFLAGS = -Wl,-q -Wall -O2 -std=c99 -I. -Iui -Iaudio -Inetwork -Iapple
 
 # VPK metadata (TITLE_ID must be exactly 9 chars)
 TITLE_ID = VCST00001
@@ -25,12 +28,31 @@ $(TARGET).vpk: eboot.bin
 	  $(TARGET).vpk
 
 eboot.bin: $(OBJS)
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+	$(CC) $(CFLAGS) $^ -Wl,--start-group $(LIBS) -Wl,--end-group -o $@
 
-%.o: %.c
+main.o: main.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+ui/ui_manager.o: ui/ui_manager.c ui/ui_manager.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+audio/audio_player.o: audio/audio_player.c audio/audio_player.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+audio/atrac_decoder.o: audio/atrac_decoder.c audio/atrac_decoder.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+network/network_manager.o: network/network_manager.c network/network_manager.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+apple/apple_sync.o: apple/apple_sync.c apple/apple_sync.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+vita2d_stub.o: vita2d_stub.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(TARGET).vpk eboot.bin param.sfo $(OBJS)
+	rm -rf ui/*.o audio/*.o network/*.o apple/*.o
 
 .PHONY: clean all
