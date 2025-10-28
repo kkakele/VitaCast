@@ -1,5 +1,5 @@
 TARGET = VitaCast
-TITLE_ID = VCST00003
+TITLE_ID = VITA12345
 
 OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o \
        network/network_manager.o apple/apple_sync.o vita2d_stub.o
@@ -28,7 +28,7 @@ param.sfo:
 	vita-mksfoex -s TITLE_ID=$(TITLE_ID) "$(TARGET)" param.sfo
 
 eboot.bin: $(TARGET).velf
-	vita-make-fself -s $< eboot.bin
+	vita-make-fself -c $< eboot.bin
 
 %.velf: %.elf
 	cp $< $<.unstripped.elf
