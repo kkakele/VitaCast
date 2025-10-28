@@ -27,7 +27,12 @@ $(TARGET).vpk: eboot.bin param.sfo
 	  $(TARGET).vpk
 
 param.sfo:
-	vita-mksfoex -s TITLE_ID=$(TITLE_ID) -s APP_VER=$(APP_VER) -s ATTRIBUTE2=12 "$(TARGET)" param.sfo
+	vita-mksfoex -s TITLE_ID=$(TITLE_ID) \
+		-s APP_VER=$(APP_VER) \
+		-s CATEGORY=gd \
+		-s ATTRIBUTE2=12 \
+		-d ATTRIBUTE=c0000000 \
+		"$(TARGET)" param.sfo
 
 eboot.bin: $(TARGET).velf
 	vita-make-fself -c -s $< $@
