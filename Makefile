@@ -1,7 +1,7 @@
 TARGET = VitaCast
 OBJS = main_final.o
 
-LIBS = -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCtrl_stub
+LIBS = -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCtrl_stub -lpng -lz -lm
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
