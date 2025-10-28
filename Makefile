@@ -17,8 +17,7 @@ CONTENT_ID = IV0000-$(TITLE_ID)_00-VITACAST000001
 
 all: $(TARGET).vpk
 
-$(TARGET).vpk: eboot.bin
-	vita-mksfoex -s TITLE_ID=$(TITLE_ID) -s APP_VER=$(APP_VER) "$(TARGET)" param.sfo
+$(TARGET).vpk: eboot.bin param.sfo
 	vita-pack-vpk -s param.sfo -b eboot.bin \
 	  -a sce_sys/icon0.png=sce_sys/icon0.png \
 	  -a sce_sys/livearea/contents/bg.png=sce_sys/livearea/contents/bg.png \
@@ -27,7 +26,16 @@ $(TARGET).vpk: eboot.bin
 	  -a sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
 	  $(TARGET).vpk
 
-eboot.bin: $(OBJS)
+param.sfo:
+	vita-mksfoex -s TITLE_ID=$(TITLE_ID) -s APP_VER=$(APP_VER) "$(TARGET)" param.sfo
+
+eboot.bin: $(TARGET).velf
+	vita-make-fself -c -s $< $@
+
+$(TARGET).velf: $(TARGET).elf
+	vita-elf-create $< $@
+
+$(TARGET).elf: $(OBJS)
 	$(CC) $(CFLAGS) $^ -Wl,--start-group $(LIBS) -Wl,--end-group -o $@
 
 main.o: main.c
@@ -52,7 +60,7 @@ vita2d_stub.o: vita2d_stub.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(TARGET).vpk eboot.bin param.sfo $(OBJS)
+	rm -rf $(TARGET).vpk $(TARGET).velf $(TARGET).elf eboot.bin param.sfo $(OBJS)
 	rm -rf ui/*.o audio/*.o network/*.o apple/*.o
 
 .PHONY: clean all
