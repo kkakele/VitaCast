@@ -1,0 +1,162 @@
+#include <vitasdk.h>
+#include <vita2d.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define APP_TITLE "VitaCast"
+#define APP_VERSION "1.0.0"
+
+typedef enum {
+    APP_STATE_MAIN_MENU,
+    APP_STATE_PODCASTS,
+    APP_STATE_MUSIC,
+    APP_STATE_PLAYER,
+    APP_STATE_SETTINGS
+} app_state_t;
+
+typedef struct {
+    app_state_t current_state;
+    bool running;
+    int selected_item;
+    int scroll_offset;
+} vita_cast_app_t;
+
+static vita_cast_app_t app = {0};
+
+static int vita_cast_init() {
+    vita2d_init();
+    vita2d_set_clear_color(RGBA8(0x1a, 0x1a, 0x1a, 0xFF));
+    app.running = true;
+    app.current_state = APP_STATE_MAIN_MENU;
+    app.selected_item = 0;
+    app.scroll_offset = 0;
+    return 0;
+}
+
+static void vita_cast_cleanup() {
+    vita2d_fini();
+}
+
+static void vita_cast_render() {
+    vita2d_start_drawing();
+    vita2d_clear_screen();
+    vita2d_draw_rectangle(0, 0, 960, 544, RGBA8(0x1a, 0x1a, 0x1a, 0xFF));
+    
+    switch (app.current_state) {
+        case APP_STATE_MAIN_MENU:
+            vita2d_draw_text(400, 100, RGBA8(255, 255, 255, 255), 48, APP_TITLE);
+            vita2d_draw_text(420, 150, RGBA8(200, 200, 200, 255), 24, APP_VERSION);
+            vita2d_draw_text(350, 200, RGBA8(150, 150, 150, 255), 20, "Podcast & Music Player");
+            
+            int menu_y = 300;
+            int button_height = 60;
+            int button_spacing = 80;
+            
+            unsigned int bg_color = app.selected_item == 0 ? RGBA8(0x4a, 0x90, 0xe2, 0xFF) : RGBA8(0x3a, 0x3a, 0x3a, 0xFF);
+            vita2d_draw_rectangle(280, menu_y, 400, button_height, bg_color);
+            vita2d_draw_text(450, menu_y + 35, RGBA8(255, 255, 255, 255), 20, "Podcasts");
+            
+            bg_color = app.selected_item == 1 ? RGBA8(0x4a, 0x90, 0xe2, 0xFF) : RGBA8(0x3a, 0x3a, 0x3a, 0xFF);
+            vita2d_draw_rectangle(280, menu_y + button_spacing, 400, button_height, bg_color);
+            vita2d_draw_text(460, menu_y + button_spacing + 35, RGBA8(255, 255, 255, 255), 20, "Music");
+            
+            bg_color = app.selected_item == 2 ? RGBA8(0x4a, 0x90, 0xe2, 0xFF) : RGBA8(0x3a, 0x3a, 0x3a, 0xFF);
+            vita2d_draw_rectangle(280, menu_y + button_spacing * 2, 400, button_height, bg_color);
+            vita2d_draw_text(450, menu_y + button_spacing * 2 + 35, RGBA8(255, 255, 255, 255), 20, "Settings");
+            break;
+            
+        case APP_STATE_PODCASTS:
+            vita2d_draw_text(400, 50, RGBA8(255, 255, 255, 255), 32, "Podcasts");
+            vita2d_draw_text(400, 200, RGBA8(200, 200, 200, 255), 20, "Search Podcasts");
+            vita2d_draw_text(400, 230, RGBA8(150, 150, 150, 255), 16, "iCloud Sync Enabled");
+            vita2d_draw_text(400, 260, RGBA8(150, 150, 150, 255), 16, "Offline Downloads Available");
+            break;
+            
+        case APP_STATE_MUSIC:
+            vita2d_draw_text(400, 50, RGBA8(255, 255, 255, 255), 32, "Music");
+            vita2d_draw_text(400, 200, RGBA8(200, 200, 200, 255), 20, "Apple Music Integration");
+            vita2d_draw_text(400, 230, RGBA8(150, 150, 150, 255), 16, "iCloud Library Sync");
+            vita2d_draw_text(400, 260, RGBA8(150, 150, 150, 255), 16, "Offline Playback");
+            break;
+            
+        case APP_STATE_PLAYER:
+            vita2d_draw_rectangle(100, 100, 760, 344, RGBA8(0x2a, 0x2a, 0x2a, 0xFF));
+            vita2d_draw_text(400, 200, RGBA8(255, 255, 255, 255), 24, "Now Playing");
+            vita2d_draw_text(400, 250, RGBA8(200, 200, 200, 255), 18, "VitaCast Player");
+            vita2d_draw_text(400, 280, RGBA8(150, 150, 150, 255), 16, "Full Audio Controls");
+            break;
+            
+        case APP_STATE_SETTINGS:
+            vita2d_draw_text(400, 50, RGBA8(255, 255, 255, 255), 32, "Settings");
+            vita2d_draw_text(400, 200, RGBA8(200, 200, 200, 255), 20, "Apple ID Configuration");
+            vita2d_draw_text(400, 250, RGBA8(200, 200, 200, 255), 20, "Download Settings");
+            vita2d_draw_text(400, 300, RGBA8(200, 200, 200, 255), 20, "Audio Quality");
+            vita2d_draw_text(400, 350, RGBA8(200, 200, 200, 255), 20, "iCloud Sync Settings");
+            break;
+    }
+    
+    vita2d_draw_text(50, 500, RGBA8(100, 100, 100, 255), 16, "D-Pad: Navigate | X: Select | O: Back | START: Exit");
+    
+    vita2d_end_drawing();
+    vita2d_swap_buffers();
+}
+
+static void vita_cast_update() {
+    SceCtrlData pad;
+    sceCtrlPeekBufferPositive(0, &pad, 1);
+    
+    if (pad.buttons & SCE_CTRL_START) {
+        app.running = false;
+        return;
+    }
+    
+    if (pad.buttons & SCE_CTRL_UP) {
+        if (app.selected_item > 0) app.selected_item--;
+    }
+    
+    if (pad.buttons & SCE_CTRL_DOWN) {
+        if (app.selected_item < 2) app.selected_item++;
+    }
+    
+    if (pad.buttons & SCE_CTRL_CROSS) {
+        switch (app.current_state) {
+            case APP_STATE_MAIN_MENU:
+                switch (app.selected_item) {
+                    case 0: app.current_state = APP_STATE_PODCASTS; break;
+                    case 1: app.current_state = APP_STATE_MUSIC; break;
+                    case 2: app.current_state = APP_STATE_SETTINGS; break;
+                }
+                break;
+        }
+    }
+    
+    if (pad.buttons & SCE_CTRL_CIRCLE) {
+        if (app.current_state != APP_STATE_MAIN_MENU) {
+            app.current_state = APP_STATE_MAIN_MENU;
+        }
+    }
+    
+    if (pad.buttons & SCE_CTRL_L1) {
+        app.current_state = APP_STATE_PODCASTS;
+    }
+    
+    if (pad.buttons & SCE_CTRL_R1) {
+        app.current_state = APP_STATE_MUSIC;
+    }
+}
+
+int main() {
+    if (vita_cast_init() < 0) {
+        return -1;
+    }
+    
+    while (app.running) {
+        vita_cast_update();
+        vita_cast_render();
+        vita2d_wait_rendering_done();
+    }
+    
+    vita_cast_cleanup();
+    return 0;
+}

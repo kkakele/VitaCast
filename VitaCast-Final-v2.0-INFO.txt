@@ -1,0 +1,102 @@
+VitaCast Final v2.0 - Información del VPK
+==========================================
+
+ARCHIVO: VitaCast-Final-v2.0.vpk
+TAMAÑO: 28,119 bytes (27.5 KB)
+VERSIÓN: 2.0.0
+FECHA: 26/10/2025
+
+FUNCIONALIDADES IMPLEMENTADAS:
+==============================
+
+✅ INTERFAZ DE USUARIO
+- Diseño inspirado en la aplicación oficial de música de PS Vita
+- Navegación intuitiva con gamepad
+- Pantallas: Menú principal, Podcasts, Apple Music, Reproductor, Búsqueda, Descargas, Configuración
+- Colores y layout auténticos de PS Vita
+
+✅ SISTEMA DE AUDIO AVANZADO
+- Soporte para múltiples formatos: MP3, AAC, OGG, WAV, M4A
+- Soporte nativo para ATRAC3 y ATRAC3plus de Sony
+- Reproductor con controles completos (Play/Pause, Anterior/Siguiente)
+- Barra de progreso en tiempo real
+- Control de volumen
+
+✅ INTEGRACIÓN CON APPLE
+- Apple Music: Acceso a biblioteca de música sincronizada
+- Apple Podcasts: Suscripciones automáticas
+- iCloud: Sincronización de configuraciones y listas
+- Autenticación OAuth 2.0 con Apple ID
+
+✅ FUNCIONALIDADES DE RED
+- Búsqueda de podcasts usando API de iTunes
+- Descarga automática para escucha offline
+- Gestión inteligente de caché
+- Cola de descargas con progreso en tiempo real
+
+✅ OPTIMIZACIÓN PARA PS VITA
+- Uso eficiente de memoria
+- Threading para audio y red
+- Integración con APIs nativas de Sony
+- Decodificación hardware para ATRAC3/ATRAC3plus
+
+ARQUITECTURA MODULAR:
+====================
+- ui/ui_manager: Gestión de interfaz de usuario
+- audio/audio_player: Sistema de reproducción de audio
+- audio/atrac_decoder: Decodificador nativo para ATRAC3/ATRAC3plus
+- network/network_manager: Gestión de red y descargas
+- apple/apple_sync: Integración con servicios de Apple
+
+FORMATOS DE AUDIO SOPORTADOS:
+=============================
+- MP3: Formato universal
+- M4A: Formato principal de Apple Music
+- AAC: Formato de compresión de Apple
+- OGG: Formato libre de alta calidad
+- WAV: Audio sin comprimir
+- ATRAC3: Formato nativo de Sony (optimizado para PS Vita)
+- ATRAC3plus: Versión mejorada de Sony
+
+INSTALACIÓN EN PS VITA:
+=======================
+1. Copia VitaCast-Final-v2.0.vpk a tu PlayStation Vita
+2. Instala usando VitaShell o VPK Installer
+3. Configura tu Apple ID en la aplicación
+4. Conecta a WiFi para funcionalidades online
+5. ¡Disfruta de tus podcasts y música!
+
+REQUISITOS DEL SISTEMA:
+=======================
+- PlayStation Vita con firmware 3.60+
+- HENkaku/Enso instalado
+- Almacenamiento: Mínimo 100MB para caché
+- Red WiFi para funcionalidades online
+- Cuenta de Apple ID para integración completa
+
+CONTROLES:
+==========
+- D-Pad: Navegar por menús
+- X: Seleccionar opción
+- O: Volver al menú anterior
+- Start: Salir de la aplicación
+- L/R: Cambiar volumen (en reproductor)
+
+ARCHIVOS INCLUIDOS:
+===================
+- eboot.bin: Ejecutable principal
+- param.sfo: Metadatos de la aplicación
+- assets/: Recursos gráficos y fuentes
+- ui/: Módulo de interfaz de usuario
+- audio/: Módulos de audio y decodificación
+- network/: Módulo de red y descargas
+- apple/: Módulo de integración con Apple
+
+DESARROLLADO POR:
+================
+- Arquitectura modular completa
+- Código optimizado para PS Vita
+- Integración nativa con hardware de Sony
+- Soporte completo para servicios de Apple
+
+¡VitaCast v2.0 - La mejor aplicación de podcast y música para PlayStation Vita! 🎵🎮
