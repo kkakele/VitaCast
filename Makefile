@@ -26,7 +26,7 @@ all: $(TARGET).vpk
 		$@
 
 eboot.bin: $(TARGET).velf
-	vita-make-fself -c $< eboot.bin
+	vita-make-fself -s $< eboot.bin
 
 %.velf: %.elf
 	cp $< $<.unstripped.elf
