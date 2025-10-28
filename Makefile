@@ -4,7 +4,8 @@ TITLE_ID = VCST00001
 OBJS = main.o
 
 LIBS = -lvita2d -lSceDisplay_stub -lSceGxm_stub -lSceCtrl_stub \
-       -lSceSysmodule_stub -lSceCommonDialog_stub
+       -lSceSysmodule_stub -lSceCommonDialog_stub -lSceAppMgr_stub \
+       -lpng -ljpeg -lfreetype -lz -lm -lc
 
 PREFIX  = arm-vita-eabi
 CC      = $(PREFIX)-gcc
