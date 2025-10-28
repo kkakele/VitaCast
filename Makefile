@@ -30,7 +30,7 @@ param.sfo:
 	vita-mksfoex -s TITLE_ID=$(TITLE_ID) "$(TARGET)" param.sfo
 
 eboot.bin: $(TARGET).velf
-	vita-make-fself $< $@
+	vita-make-fself -c $< $@
 
 $(TARGET).velf: $(TARGET).elf
 	vita-elf-create $< $@
