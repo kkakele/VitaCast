@@ -7,17 +7,15 @@ PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
 CFLAGS = -Wl,-q -Wall -O2 -std=c99
 
-# VPK metadata (TITLE_ID must be 9 chars)
-TITLE_ID = VCAST2000
-APP_VER = 02.01
-CONTENT_ID = UP0000-$(TITLE_ID)_00-0000000000000000
+# VPK metadata (TITLE_ID must be exactly 9 chars)
+TITLE_ID = VCST00001
+APP_VER = 01.00
+CONTENT_ID = IV0000-$(TITLE_ID)_00-VITACAST000001
 
 all: $(TARGET).vpk
 
 $(TARGET).vpk: eboot.bin
-	# Generar param.sfo con metadatos válidos para VitaShell
-	vita-mksfoex -s TITLE_ID=$(TITLE_ID) -s APP_VER=$(APP_VER) -s CONTENT_ID=$(CONTENT_ID) "$(TARGET)" param.sfo
-	# Empaquetar VPK incluyendo recursos esenciales de sce_sys
+	vita-mksfoex -s TITLE_ID=$(TITLE_ID) -s APP_VER=$(APP_VER) "$(TARGET)" param.sfo
 	vita-pack-vpk -s param.sfo -b eboot.bin \
 	  -a sce_sys/icon0.png=sce_sys/icon0.png \
 	  -a sce_sys/livearea/contents/bg.png=sce_sys/livearea/contents/bg.png \

@@ -28,6 +28,9 @@ jobs:
         export VITASDK=/usr/local/vitasdk
         export PATH=$VITASDK/bin:$PATH
         ls -la
+        # Verificar que existen los recursos necesarios
+        ls -la sce_sys/
+        ls -la sce_sys/livearea/contents/
         make clean
         make
         
