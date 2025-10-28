@@ -1,7 +1,7 @@
 TARGET = VitaCast
 TITLE_ID = VCST00001
 
-OBJS = main.o
+OBJS = main_final.o
 
 LIBS = -lvita2d -lSceDisplay_stub -lSceGxm_stub -lSceCtrl_stub \
        -lSceSysmodule_stub -lSceCommonDialog_stub -lSceAppMgr_stub \
