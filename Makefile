@@ -1,5 +1,5 @@
 TARGET = VitaCast
-TITLE_ID = VCST00001
+TITLE_ID = VITA00001
 
 OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o \
        network/network_manager.o apple/apple_sync.o vita2d_stub.o
