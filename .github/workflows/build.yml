@@ -6,13 +6,16 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       
     - name: Setup VitaSDK
       run: |
@@ -35,7 +38,7 @@ jobs:
         make
         
     - name: Upload VPK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: VitaCast-VPK
         path: VitaCast.vpk
