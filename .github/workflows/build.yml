@@ -21,8 +21,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential wget
-        wget https://github.com/vitasdk/autobuilds/releases/download/master-linux-v1200/vitasdk-x86_64-linux-gnu-2022-06-08_12-10-10.tar.bz2
-        sudo tar -xf vitasdk-x86_64-linux-gnu-2022-06-08_12-10-10.tar.bz2 -C /usr/local/
+        wget https://github.com/vitasdk/autobuilds/releases/download/master-linux-v1764/vitasdk-x86_64-linux-gnu-2024-10-01_11-36-23.tar.bz2
+        sudo tar -xf vitasdk-x86_64-linux-gnu-2024-10-01_11-36-23.tar.bz2 -C /usr/local/
         echo "VITASDK=/usr/local/vitasdk" >> $GITHUB_ENV
         echo "/usr/local/vitasdk/bin" >> $GITHUB_PATH
         
