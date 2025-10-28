@@ -12,24 +12,14 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: gnuton/vitasdk-docker:latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
-    - name: Setup VitaSDK
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential wget
-        wget https://github.com/vitasdk/autobuilds/releases/download/master-linux-v1764/vitasdk-x86_64-linux-gnu-2024-10-01_11-36-23.tar.bz2
-        sudo tar -xf vitasdk-x86_64-linux-gnu-2024-10-01_11-36-23.tar.bz2 -C /usr/local/
-        echo "VITASDK=/usr/local/vitasdk" >> $GITHUB_ENV
-        echo "/usr/local/vitasdk/bin" >> $GITHUB_PATH
         
     - name: Build
       run: |
-        export VITASDK=/usr/local/vitasdk
-        export PATH=$VITASDK/bin:$PATH
         ls -la
         # Verificar que existen los recursos necesarios
         ls -la sce_sys/
