@@ -1,10 +1,13 @@
 TARGET = VitaCast
 TITLE_ID = VCST00001
 
-OBJS = main_final.o
+OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o \
+       network/network_manager.o apple/apple_sync.o vita2d_stub.o
 
 LIBS = -lvita2d -lSceDisplay_stub -lSceGxm_stub -lSceCtrl_stub \
        -lSceSysmodule_stub -lSceCommonDialog_stub -lSceAppMgr_stub \
+       -lSceNet_stub -lSceNetCtl_stub -lSceIofilemgr_stub -lSceLibKernel_stub \
+       -lSceSsl_stub -lcurl -lssl -lcrypto \
        -lpng -ljpeg -lfreetype -lz -lm -lc
 
 PREFIX  = arm-vita-eabi
@@ -38,3 +41,19 @@ clean:
 		eboot.bin param.sfo *.unstripped.elf
 
 .PHONY: all clean
+
+# Reglas para compilar módulos
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+ui/%.o: ui/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+audio/%.o: audio/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+network/%.o: network/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+apple/%.o: apple/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
