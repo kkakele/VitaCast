@@ -11,7 +11,7 @@ CC = $(PREFIX)-gcc
 CFLAGS = -Wl,-q -Wall -O2 -std=gnu99 -I. -Iui -Iaudio -Inetwork -Iapple
 
 # VPK metadata (TITLE_ID must be exactly 9 chars)
-TITLE_ID = VCST99999
+TITLE_ID = PCSV00001
 APP_VER = 01.00
 
 all: $(TARGET).vpk
