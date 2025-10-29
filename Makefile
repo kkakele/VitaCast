@@ -31,6 +31,8 @@ param.sfo:
 		-s VERSION=$(APP_VER) \
 		-s CATEGORY=gd \
 		-s STITLE="$(TARGET)" \
+		-s PSP2_DISP_VER="01.000" \
+		-s PSP2_SYSTEM_VER="03.600000" \
 		-d ATTRIBUTE2=12 \
 		-d PARENTAL_LEVEL=1 \
 		-d ATTRIBUTE=0x8000 \
