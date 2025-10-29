@@ -1,15 +1,19 @@
 TARGET = VitaCast
 PROJECT_TITLE = VitaCast
-PROJECT_TITLEID = VCTS00001
+PROJECT_TITLEID = VCST00001
 
-OBJS = main_test.o
+OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o vita2d_stub.o
 
-LIBS = -lSceDisplay_stub -lSceCtrl_stub -lSceLibKernel_stub
+LIBS = -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCtrl_stub \
+	-lSceSysmodule_stub -lSceCommonDialog_stub -lSceAppMgr_stub \
+	-lSceNet_stub -lSceNetCtl_stub -lSceIofilemgr_stub -lSceLibKernel_stub \
+	-lSceSsl_stub -lSceHttp_stub -lcurl -lssl -lcrypto \
+	-lpng -ljpeg -lfreetype -lz -lm -lc -lstdc++
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
 STRIP = $(PREFIX)-strip
-CFLAGS = -Wl,-q -Wall -O2 -std=gnu99
+CFLAGS = -Wl,-q -Wall -O3 -std=gnu99 -I. -Iui -Iaudio -Inetwork -Iapple
 
 all: $(TARGET).vpk
 
@@ -22,22 +26,41 @@ $(TARGET).vpk: eboot.bin param.sfo
 	$(TARGET).vpk
 
 eboot.bin: $(TARGET).velf
-	vita-make-fself -c -a 0x40000 $(TARGET).velf eboot.bin
+	vita-make-fself -s $(TARGET).velf eboot.bin
 
 param.sfo:
-	vita-mksfoex -s TITLE_ID="$(PROJECT_TITLEID)" -s APP_VER=01.00 "$(PROJECT_TITLE)" param.sfo
+	vita-mksfoex -s TITLE_ID="$(PROJECT_TITLEID)" -s APP_VER=01.00 -d ATTRIBUTE2=12 "$(PROJECT_TITLE)" param.sfo
 
 $(TARGET).velf: $(TARGET).elf
-	$(STRIP) -g $<
-	vita-elf-create $< $@
+	vita-elf-create -e $(TARGET).elf $(TARGET).velf
 
 $(TARGET).elf: $(OBJS)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+	$(STRIP) -g $@
 
-main_test.o: main_test.c
+main.o: main.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+ui/ui_manager.o: ui/ui_manager.c ui/ui_manager.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+audio/audio_player.o: audio/audio_player.c audio/audio_player.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+audio/atrac_decoder.o: audio/atrac_decoder.c audio/atrac_decoder.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+network/network_manager.o: network/network_manager.c network/network_manager.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+apple/apple_sync.o: apple/apple_sync.c apple/apple_sync.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+vita2d_stub.o: vita2d_stub.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(TARGET).vpk $(TARGET).velf $(TARGET).elf eboot.bin param.sfo $(OBJS)
+	rm -rf ui/*.o audio/*.o network/*.o apple/*.o
 
 .PHONY: all clean
