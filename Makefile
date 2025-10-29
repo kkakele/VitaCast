@@ -30,13 +30,25 @@ $(TARGET).vpk: eboot.bin
 	  -a sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
 	  $(TARGET).vpk
 
-eboot.bin: $(OBJS)
+%.velf: %.elf
+	$(VITASDK)/bin/vita-elf-create $< $@
+
+%.self: %.velf
+	$(VITASDK)/bin/vita-make-fself -c $< $@
+
+$(TARGET).elf: $(OBJS)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+
+$(TARGET).velf: $(TARGET).elf
+	$(VITASDK)/bin/vita-elf-create $< $@
+
+eboot.bin: $(TARGET).velf
+	$(VITASDK)/bin/vita-make-fself -c $< $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(TARGET).vpk eboot.bin param.sfo $(OBJS)
+	rm -rf $(TARGET).vpk $(TARGET).velf $(TARGET).elf eboot.bin param.sfo $(OBJS)
 
 .PHONY: clean all
