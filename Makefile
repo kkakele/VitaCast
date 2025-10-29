@@ -19,6 +19,7 @@ all: $(TARGET).vpk
 $(TARGET).vpk: eboot.bin param.sfo
 	vita-pack-vpk -s param.sfo -b eboot.bin \
 	  -a sce_sys/icon0.png=sce_sys/icon0.png \
+	  -a sce_sys/livearea/contents/bg.png=sce_sys/livearea/contents/bg.png \
 	  -a sce_sys/livearea/contents/bg0.png=sce_sys/livearea/contents/bg0.png \
 	  -a sce_sys/livearea/contents/startup.png=sce_sys/livearea/contents/startup.png \
 	  -a sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
