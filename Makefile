@@ -36,10 +36,11 @@ param.sfo:
 		-d ATTRIBUTE2=12 \
 		-d PARENTAL_LEVEL=1 \
 		-d ATTRIBUTE=0x8000 \
+		-d ATTRIBUTE_MINOR=0x10 \
 		"$(TARGET)" param.sfo
 
 eboot.bin: $(TARGET).velf
-	vita-make-fself -c $< $@
+	vita-make-fself -a 0x40000 $< $@
 
 $(TARGET).velf: $(TARGET).elf
 	vita-elf-create $< $@
