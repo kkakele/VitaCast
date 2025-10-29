@@ -1,42 +1,44 @@
 TARGET = VitaCast
-PROJECT_TITLE = VitaCast
-PROJECT_TITLEID = VITA00001
-
 OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o vita2d_stub.o
 
 LIBS = -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCtrl_stub \
-	-lSceSysmodule_stub -lSceCommonDialog_stub -lSceAppMgr_stub \
-	-lSceNet_stub -lSceNetCtl_stub -lSceIofilemgr_stub -lSceLibKernel_stub \
-	-lSceSsl_stub -lSceHttp_stub -lcurl -lssl -lcrypto \
-	-lpng -ljpeg -lfreetype -lz -lm -lc -lstdc++
+  -lSceSysmodule_stub -lSceCommonDialog_stub -lSceAppMgr_stub \
+  -lSceNet_stub -lSceNetCtl_stub -lSceIofilemgr_stub -lSceLibKernel_stub \
+  -lSceSsl_stub -lcurl -lssl -lcrypto -lpng -ljpeg -lfreetype -lz -lm -lc
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
-STRIP = $(PREFIX)-strip
-CFLAGS = -Wl,-q -Wall -O3 -std=gnu99 -I. -Iui -Iaudio -Inetwork -Iapple
+CFLAGS = -Wl,-q -Wall -O2 -std=gnu99 -I. -Iui -Iaudio -Inetwork -Iapple
+
+# VPK metadata (TITLE_ID must be exactly 9 chars)
+TITLE_ID = VCST99999
+APP_VER = 01.00
 
 all: $(TARGET).vpk
 
 $(TARGET).vpk: eboot.bin param.sfo
 	vita-pack-vpk -s param.sfo -b eboot.bin \
-		--add sce_sys/icon0.png=sce_sys/icon0.png \
-		--add sce_sys/livearea/contents/bg.png=sce_sys/livearea/contents/bg.png \
-		--add sce_sys/livearea/contents/startup.png=sce_sys/livearea/contents/startup.png \
-		--add sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
-	$(TARGET).vpk
-
-eboot.bin: $(TARGET).velf
-	vita-make-fself -c -s $(TARGET).velf eboot.bin
+	  -a sce_sys/icon0.png=sce_sys/icon0.png \
+	  -a sce_sys/livearea/contents/bg.png=sce_sys/livearea/contents/bg.png \
+	  -a sce_sys/livearea/contents/startup.png=sce_sys/livearea/contents/startup.png \
+	  -a sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
+	  $(TARGET).vpk
 
 param.sfo:
-	vita-mksfoex -s TITLE_ID="$(PROJECT_TITLEID)" -s APP_VER=01.00 -d ATTRIBUTE2=12 "$(PROJECT_TITLE)" param.sfo
+	vita-mksfoex -s TITLE_ID=$(TITLE_ID) \
+		-s APP_VER=$(APP_VER) \
+		-s CATEGORY=gd \
+		-d ATTRIBUTE2=12 \
+		"$(TARGET)" param.sfo
+
+eboot.bin: $(TARGET).velf
+	vita-make-fself $< $@
 
 $(TARGET).velf: $(TARGET).elf
-	vita-elf-create $(TARGET).elf $(TARGET).velf
+	vita-elf-create $< $@
 
 $(TARGET).elf: $(OBJS)
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
-	$(STRIP) -g $@
+	$(CC) $(CFLAGS) $^ -Wl,--start-group $(LIBS) -Wl,--end-group -o $@
 
 main.o: main.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -63,4 +65,4 @@ clean:
 	rm -rf $(TARGET).vpk $(TARGET).velf $(TARGET).elf eboot.bin param.sfo $(OBJS)
 	rm -rf ui/*.o audio/*.o network/*.o apple/*.o
 
-.PHONY: all clean
+.PHONY: clean all
