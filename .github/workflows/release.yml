@@ -1,0 +1,104 @@
+name: Release VitaCast
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    container: vitasdk/vitasdk:latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      
+    - name: Instalar dependencias
+      run: |
+        apk add --no-cache git cmake make pkgconfig zip
+        
+    - name: Compilar VitaCast Simple
+      run: |
+        export VITASDK=/usr/local/vitasdk
+        export PATH=$VITASDK/bin:$PATH
+        make clean
+        make all
+        mv VitaCast.vpk VitaCast-Simple.vpk
+        
+    - name: Compilar VitaCast Complete
+      run: |
+        export VITASDK=/usr/local/vitasdk
+        export PATH=$VITASDK/bin:$PATH
+        make -f Makefile_complete clean
+        make -f Makefile_complete all
+        mv VitaCast.vpk VitaCast-Complete.vpk
+        
+    - name: Verificar VPKs
+      run: |
+        echo "=== VitaCast Simple ==="
+        ls -lh VitaCast-Simple.vpk
+        unzip -l VitaCast-Simple.vpk
+        
+        echo ""
+        echo "=== VitaCast Complete ==="
+        ls -lh VitaCast-Complete.vpk
+        unzip -l VitaCast-Complete.vpk
+        
+    - name: Crear Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          VitaCast-Simple.vpk
+          VitaCast-Complete.vpk
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        body: |
+          # VitaCast ${{ github.ref_name }}
+          
+          ## 🎉 Release Oficial
+          
+          ### 📦 Archivos Disponibles
+          
+          #### VitaCast-Simple.vpk (~14 KB)
+          - Versión ligera y rápida
+          - Interfaz básica
+          - Ideal para probar la app
+          
+          #### VitaCast-Complete.vpk (2-5 MB)
+          - Versión completa con todas las funcionalidades
+          - Reproductor de audio (MP3, AAC, OGG, WAV, M4A, ATRAC3)
+          - Integración con Apple Music y Podcasts
+          - Búsqueda y descarga de podcasts
+          - Interfaz gráfica completa con vita2d
+          - Gestión de red con curl
+          
+          ### ✅ Error 3D Solucionado
+          - param.sfo binario válido
+          - eboot.bin compilado correctamente
+          - Se instala sin errores en VitaShell
+          
+          ### 📋 Requisitos
+          - PS Vita con Firmware 3.60+
+          - HENkaku o Enso instalado
+          - VitaShell para instalación
+          
+          ### 📥 Instalación
+          1. Descarga el VPK que prefieras
+          2. Copia a tu PS Vita (USB o FTP)
+          3. Abre VitaShell
+          4. Navega al VPK y presiona X
+          5. ¡Disfruta VitaCast!
+          
+          ### 🎮 Controles
+          - **D-Pad**: Navegación
+          - **X**: Seleccionar
+          - **O**: Volver
+          - **START**: Salir
+          
+          ---
+          **Compilado automáticamente con GitHub Actions**
+          Commit: ${{ github.sha }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
