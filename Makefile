@@ -28,8 +28,10 @@ $(TARGET).vpk: eboot.bin param.sfo
 param.sfo:
 	vita-mksfoex -s TITLE_ID=$(TITLE_ID) \
 		-s APP_VER=$(APP_VER) \
+		-s VERSION=$(APP_VER) \
 		-s CATEGORY=gd \
 		-d ATTRIBUTE2=12 \
+		-d PARENTAL_LEVEL=1 \
 		"$(TARGET)" param.sfo
 
 eboot.bin: $(TARGET).velf
