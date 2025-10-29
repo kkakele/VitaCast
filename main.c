@@ -1,4 +1,4 @@
-﻿#include <vitasdk.h>
+#include <vitasdk.h>
 #include <vita2d.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,7 +47,8 @@ static int vita_cast_init() {
     }
     
     network_manager_connect(app->network_manager);
-    app->background_texture = vita2d_load_PNG_file("app0:/assets/background.png");
+    // Intentar cargar background, si falla usar color sólido
+    app->background_texture = vita2d_load_PNG_file("app0:/sce_sys/livearea/contents/bg0.png");
     
     return 0;
 }

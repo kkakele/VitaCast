@@ -1,7 +1,7 @@
 TARGET = VitaCast
-OBJS = main_simple.o
+OBJS = main.o
 
-LIBS = -lSceDisplay_stub -lSceCtrl_stub
+LIBS = -lSceDisplay_stub -lSceCtrl_stub -lvita2d_stub -lcurl -lssl -lcrypto -lpng -ljpeg -lfreetype
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
@@ -26,13 +26,20 @@ $(TARGET).vpk: eboot.bin
 	  -a sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
 	  $(TARGET).vpk
 
-eboot.bin: $(OBJS)
+$(TARGET).elf: $(OBJS)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+
+$(TARGET).velf: $(TARGET).elf
+	vita-elf-create $(TARGET).elf $(TARGET).velf
+
+eboot.bin: $(TARGET).velf
+	# Generar SELF sin compresión y con flag UNSAFE (-s)
+	vita-make-fself -s $(TARGET).velf eboot.bin
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(TARGET).vpk eboot.bin param.sfo $(OBJS)
+	rm -rf $(TARGET).vpk eboot.bin param.sfo $(OBJS) $(TARGET).elf $(TARGET).velf
 
 .PHONY: clean all
