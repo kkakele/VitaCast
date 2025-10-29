@@ -39,7 +39,7 @@ param.sfo:
 		"$(TARGET)" param.sfo
 
 eboot.bin: $(TARGET).velf
-	vita-make-fself $< $@
+	vita-make-fself -s $< $@
 
 $(TARGET).velf: $(TARGET).elf
 	vita-elf-create $< $@
