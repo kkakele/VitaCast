@@ -35,12 +35,11 @@ param.sfo:
 		-s PSP2_SYSTEM_VER="03.600000" \
 		-d ATTRIBUTE2=12 \
 		-d PARENTAL_LEVEL=1 \
-		-d ATTRIBUTE=0x8000 \
-		-d ATTRIBUTE_MINOR=0x10 \
+		-d ATTRIBUTE=0xc000 \
 		"$(TARGET)" param.sfo
 
 eboot.bin: $(TARGET).velf
-	vita-make-fself -a 0x40000 $< $@
+	vita-make-fself $< $@
 
 $(TARGET).velf: $(TARGET).elf
 	vita-elf-create $< $@
