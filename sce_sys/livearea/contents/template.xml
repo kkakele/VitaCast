@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <livearea>
   <livearea-background>
-    <image>bg.png</image>
+    <image>bg0.png</image>
   </livearea-background>
   <gate>
     <frame id="frame1">
