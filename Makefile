@@ -29,7 +29,7 @@ eboot.bin: $(TARGET).velf
 	vita-make-fself -c -a 0x40000 $(TARGET).velf eboot.bin
 
 param.sfo:
-	vita-mksfoex -s TITLE_ID="$(PROJECT_TITLEID)" "$(PROJECT_TITLE)" param.sfo
+	vita-mksfoex -s TITLE_ID="$(PROJECT_TITLEID)" -s APP_VER=01.00 "$(PROJECT_TITLE)" param.sfo
 
 $(TARGET).velf: $(TARGET).elf
 	$(STRIP) -g $<
