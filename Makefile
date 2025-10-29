@@ -32,7 +32,7 @@ param.sfo:
 	vita-mksfoex -s TITLE_ID="$(PROJECT_TITLEID)" -s APP_VER=01.00 -d ATTRIBUTE2=12 "$(PROJECT_TITLE)" param.sfo
 
 $(TARGET).velf: $(TARGET).elf
-	vita-elf-create -e $(TARGET).elf $(TARGET).velf
+	vita-elf-create $(TARGET).elf $(TARGET).velf
 
 $(TARGET).elf: $(OBJS)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
