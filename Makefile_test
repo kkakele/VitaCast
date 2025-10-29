@@ -1,0 +1,43 @@
+TARGET = VitaCast
+PROJECT_TITLE = VitaCast
+PROJECT_TITLEID = VCTS00001
+
+OBJS = main_test.o
+
+LIBS = -lSceDisplay_stub -lSceCtrl_stub -lSceLibKernel_stub
+
+PREFIX = arm-vita-eabi
+CC = $(PREFIX)-gcc
+STRIP = $(PREFIX)-strip
+CFLAGS = -Wl,-q -Wall -O2 -std=gnu99
+
+all: $(TARGET).vpk
+
+$(TARGET).vpk: eboot.bin param.sfo
+	vita-pack-vpk -s param.sfo -b eboot.bin \
+		--add sce_sys/icon0.png=sce_sys/icon0.png \
+		--add sce_sys/livearea/contents/bg.png=sce_sys/livearea/contents/bg.png \
+		--add sce_sys/livearea/contents/startup.png=sce_sys/livearea/contents/startup.png \
+		--add sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
+	$(TARGET).vpk
+
+eboot.bin: $(TARGET).velf
+	vita-make-fself -c -a 0x40000 $(TARGET).velf eboot.bin
+
+param.sfo:
+	vita-mksfoex -s TITLE_ID="$(PROJECT_TITLEID)" -s APP_VER=01.00 "$(PROJECT_TITLE)" param.sfo
+
+$(TARGET).velf: $(TARGET).elf
+	$(STRIP) -g $<
+	vita-elf-create $< $@
+
+$(TARGET).elf: $(OBJS)
+	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+
+main_test.o: main_test.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -rf $(TARGET).vpk $(TARGET).velf $(TARGET).elf eboot.bin param.sfo $(OBJS)
+
+.PHONY: all clean

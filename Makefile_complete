@@ -25,8 +25,7 @@ APPLE_DIR = apple
 all: $(TARGET).vpk
 
 $(TARGET).vpk: eboot.bin
-	# TITLE_ID debe tener 9 caracteres
-	vita-mksfoex -s TITLE_ID=VCAST2000 -s APP_VER=02.00 -s CONTENT_ID=UP0000-VCAST2000_00-0000000000000000 "$(TARGET)" param.sfo
+	vita-mksfoex -s TITLE_ID=VCST00001 -s APP_VER=01.00 "$(TARGET)" param.sfo
 	vita-pack-vpk -s param.sfo -b eboot.bin $(TARGET).vpk
 
 eboot.bin: $(OBJS)

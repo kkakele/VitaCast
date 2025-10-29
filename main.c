@@ -1,4 +1,4 @@
-﻿#include <vitasdk.h>
+#include <vitasdk.h>
 #include <vita2d.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,7 +47,9 @@ static int vita_cast_init() {
     }
     
     network_manager_connect(app->network_manager);
-    app->background_texture = vita2d_load_PNG_file("app0:/assets/background.png");
+    // background_texture no existe en VPK, comentado para evitar crash
+    // app->background_texture = vita2d_load_PNG_file("app0:/assets/background.png");
+    app->background_texture = NULL;
     
     return 0;
 }

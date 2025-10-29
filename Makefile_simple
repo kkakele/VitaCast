@@ -10,7 +10,7 @@ CFLAGS = -Wl,-q -Wall -O2 -std=c99
 all: $(TARGET).vpk
 
 $(TARGET).vpk: eboot.bin
-	vita-mksfoex -s TITLE_ID=VITACAST01 -s APP_VER=01.00 -s CONTENT_ID=PCSE00001 "$(TARGET)" param.sfo
+	vita-mksfoex -s TITLE_ID=VCST00001 -s APP_VER=01.00 "$(TARGET)" param.sfo
 	vita-pack-vpk -s param.sfo -b eboot.bin $(TARGET).vpk
 
 eboot.bin: $(OBJS)
