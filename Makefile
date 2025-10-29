@@ -17,13 +17,15 @@ APP_VER = 01.00
 all: $(TARGET).vpk
 
 $(TARGET).vpk: eboot.bin param.sfo
-	vita-pack-vpk -s param.sfo -b eboot.bin \
-	  -a sce_sys/icon0.png=sce_sys/icon0.png \
-	  -a sce_sys/livearea/contents/bg.png=sce_sys/livearea/contents/bg.png \
-	  -a sce_sys/livearea/contents/bg0.png=sce_sys/livearea/contents/bg0.png \
-	  -a sce_sys/livearea/contents/startup.png=sce_sys/livearea/contents/startup.png \
-	  -a sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
-	  $(TARGET).vpk
+	mkdir -p vpk_temp/sce_sys/livearea/contents
+	cp eboot.bin vpk_temp/
+	cp param.sfo vpk_temp/sce_sys/
+	cp sce_sys/icon0.png vpk_temp/sce_sys/
+	cp sce_sys/livearea/contents/bg.png vpk_temp/sce_sys/livearea/contents/
+	cp sce_sys/livearea/contents/startup.png vpk_temp/sce_sys/livearea/contents/
+	cp sce_sys/livearea/contents/template.xml vpk_temp/sce_sys/livearea/contents/
+	cd vpk_temp && zip -r ../$(TARGET).vpk . && cd ..
+	rm -rf vpk_temp
 
 param.sfo:
 	vita-mksfoex -s TITLE_ID=$(TITLE_ID) \
