@@ -1,6 +1,6 @@
 TARGET = VitaCast
 PROJECT_TITLE = VitaCast
-PROJECT_TITLEID = VSDK00099
+PROJECT_TITLEID = VCTS00001
 
 OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o vita2d_stub.o
 
@@ -26,7 +26,7 @@ $(TARGET).vpk: eboot.bin param.sfo
 	$(TARGET).vpk
 
 eboot.bin: $(TARGET).velf
-	vita-make-fself $(TARGET).velf eboot.bin
+	vita-make-fself -c -a 0x40000 $(TARGET).velf eboot.bin
 
 param.sfo:
 	vita-mksfoex -s TITLE_ID="$(PROJECT_TITLEID)" "$(PROJECT_TITLE)" param.sfo
