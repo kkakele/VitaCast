@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<livearea>
-  <livearea-background>
-    <image>bg0.png</image>
-  </livearea-background>
-  <gate>
-    <frame id="frame1">
-      <liveitem>
-        <image>startup.png</image>
-      </liveitem>
-    </frame>
-  </gate>
+
+<livearea style="a1" format-ver="01.00" content-rev="1">
+	<livearea-background>
+		<image>bg.png</image>
+	</livearea-background>
+	
+	<gate>
+		<startup-image>startup.png</startup-image>
+	</gate>
 </livearea>
