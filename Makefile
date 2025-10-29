@@ -30,8 +30,10 @@ param.sfo:
 		-s APP_VER=$(APP_VER) \
 		-s VERSION=$(APP_VER) \
 		-s CATEGORY=gd \
+		-s STITLE="$(TARGET)" \
 		-d ATTRIBUTE2=12 \
 		-d PARENTAL_LEVEL=1 \
+		-d ATTRIBUTE=0x8000 \
 		"$(TARGET)" param.sfo
 
 eboot.bin: $(TARGET).velf
