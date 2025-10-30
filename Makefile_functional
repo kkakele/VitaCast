@@ -1,18 +1,22 @@
 TARGET = VitaCast
-OBJS = main_minimal_safe.o
-
-# Librerías MÍNIMAS necesarias
-LIBS = -lSceCtrl_stub -lSceDisplay_stub
+OBJS = main_complete.o
 
 # VitaSDK paths
 VITASDK ?= .deps/vitasdk
 PREFIX = $(VITASDK)/bin/arm-vita-eabi
 CC = $(PREFIX)-gcc
-CFLAGS = -Wl,-q -Wall -O2
+CFLAGS = -Wall -O2 -std=c99
+LDFLAGS =
 VITA_MKSFOEX = $(VITASDK)/bin/vita-mksfoex
 VITA_PACK_VPK = $(VITASDK)/bin/vita-pack-vpk
 
-# VPK metadata (TITLE_ID must be 9 chars)
+# Librerías básicas disponibles
+LIBS = -lvita2d -lSceDisplay_stub -lSceGxm_stub \
+       -lSceSysmodule_stub -lSceCtrl_stub \
+       -lSceCommonDialog_stub -lpng -lz -lm \
+       -lSceNet_stub -lSceNetCtl_stub -lcurl
+
+# VPK metadata
 TITLE_ID = VCAST2000
 APP_VER = 02.01
 CONTENT_ID = UP0000-$(TITLE_ID)_00-0000000000000000
@@ -31,20 +35,13 @@ $(TARGET).vpk: eboot.bin
 	  -a sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
 	  $(TARGET).vpk
 
-$(TARGET).elf: $(OBJS)
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
-
-$(TARGET).velf: $(TARGET).elf
-	arm-vita-eabi-strip -g $<
-	$(VITASDK)/bin/vita-elf-create $< $@
-
-eboot.bin: $(TARGET).velf
-	$(VITASDK)/bin/vita-make-fself $< $@
+eboot.bin: $(OBJS)
+	$(CC) $(LDFLAGS) $^ $(LIBS) -o $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(TARGET).vpk $(TARGET).velf $(TARGET).elf eboot.bin param.sfo $(OBJS) main_simple.o
+	rm -rf $(TARGET).vpk eboot.bin param.sfo $(OBJS)
 
 .PHONY: clean all

@@ -1,6 +1,15 @@
 # VitaCast - Podcast & Music App for PlayStation Vita
 
+[![Build VitaCast VPK](https://github.com/kkakele/VitaCast/actions/workflows/build-vpk.yml/badge.svg)](https://github.com/kkakele/VitaCast/actions/workflows/build-vpk.yml)
+[![Release VitaCast](https://github.com/kkakele/VitaCast/actions/workflows/release.yml/badge.svg)](https://github.com/kkakele/VitaCast/actions/workflows/release.yml)
+
 VitaCast es una aplicación completa de podcast y música para PlayStation Vita que combina la funcionalidad moderna de streaming con la estética clásica de la aplicación oficial de música de PS Vita.
+
+## 📥 Descarga Rápida
+
+**[➡️ Ir a Releases y descargar el VPK](https://github.com/kkakele/VitaCast/releases/latest)**
+
+Los VPKs se compilan automáticamente con GitHub Actions usando VitaSDK completo.a.
 
 ## 🎵 Características Principales
 
@@ -56,12 +65,7 @@ VitaCast/
 │   ├── next.png
 │   ├── prev.png
 │   └── fonts/
-└── Makefile_complete         # Sistema de compilación
-```
-
-## 🛠️ Requisitos del Sistema
-
-### Desarrollo
+└── Makefile_complete         # Sis### Desarrollo
 - **VitaSDK** instalado y configurado
 - **arm-vita-eabi-gcc** compilador
 - **vita-mksfoex** y **vita-pack-vpk** para crear VPKs
@@ -74,28 +78,52 @@ VitaCast/
 - **Almacenamiento**: Mínimo 100MB para caché
 - **Red WiFi** para funcionalidades online
 
-## 🚀 Instalación y Compilación
+## 🚀 Instalación y Compilaciónso** instalado
+- **Almacenamiento*## 🚀 Instalación y Compilación
 
-### Compilación
+### Opción 1: Descargar VPK Pre-compilado (Recomendado)
+
+**La manera más fácil:** Los VPKs se compilan automáticamente con cada cambio.
+
+1. Ve a [Releases](https://github.com/kkakele/VitaCast/releases)
+2. Descarga la última versión
+3. Elige entre:
+   - **VitaCast-Simple.vpk** (~14 KB) - Versión ligera
+   - **VitaCast-Complete.vpk** (2-5 MB) - Versión completa
+
+### Opción 2: Compilación Local
+
+#### Requisitos
+- VitaSDK instalado y configurado
+- Variables de entorno configuradas (`VITASDK`, `PATH`)
+
+#### Compilar
 ```bash
-# Compilar proyecto completo
-make -f Makefile_complete
+# Versión simple
+make clean
+make all
 
-# Compilar versión de debug
-make -f Makefile_complete debug
-
-# Compilar versión optimizada
-make -f Makefile_complete release
-
-# Limpiar archivos de compilación
+# Versión completa
 make -f Makefile_complete clean
+make -f Makefile_complete all
 ```
 
-### Instalación en PS Vita
-```bash
-# Instalar VPK (requiere vita-install-vpk)
-make -f Makefile_complete install
+### Opción 3: Compilar con GitHub Actions
 
+Cada push y tag dispara una compilación automática:
+
+```bash
+# Crear un nuevo tag para release
+git tag v2.1.0
+git push origin v2.1.0
+
+# GitHub Ac### Instalación en PS Vita
+1. Descarga el VPK desde Releases o compílalo
+2. Copia a tu PS Vita vía USB o FTP
+3. Abre VitaShell
+4. Navega al VPK
+5. Presiona X para instalar
+6. ¡Listo!
 # O instalar manualmente
 vita-install-vpk VitaCast.vpk
 ```

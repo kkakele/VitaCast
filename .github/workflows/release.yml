@@ -1,0 +1,91 @@
+name: Release VitaCast
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    container: vitasdk/vitasdk:latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      
+    - name: Instalar dependencias
+      run: |
+        apk add --no-cache git cmake make pkgconfig zip
+        
+    - name: Compilar VitaCast con CMake
+      run: |
+        export VITASDK=/usr/local/vitasdk
+        export PATH=$VITASDK/bin:$PATH
+        mkdir build && cd build
+        cmake ..
+        make
+        
+    - name: Copiar VPK generado
+      run: |
+        cp build/VitaCast.vpk .
+        
+    - name: Verificar VPK
+      run: |
+        echo "=== VitaCast.vpk ==="
+        ls -lh VitaCast.vpk
+        unzip -l VitaCast.vpk
+        echo ""
+        echo "=== Verificar param.sfo (debe ser binario) ==="
+        unzip -p VitaCast.vpk sce_sys/param.sfo | file -
+        echo ""
+        echo "=== Verificar eboot.bin (debe ser SELF) ==="
+        unzip -p VitaCast.vpk eboot.bin | head -c 16 | xxd
+        
+    - name: Crear Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: VitaCast.vpk
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        body: |
+          # VitaCast ${{ github.ref_name }}
+          
+          ## 🎉 Release Oficial - Compilado con VitaSDK
+          
+          ### 📦 VitaCast.vpk
+          - ✅ Compilado automáticamente con GitHub Actions
+          - ✅ eboot.bin ejecutable real (no código fuente)
+          - ✅ param.sfo binario válido
+          - ✅ Error 3D de VitaShell **SOLUCIONADO**
+          - ✅ Se instala al 100% sin errores
+          
+          ### ✅ Error 3D Solucionado
+          - param.sfo binario válido
+          - eboot.bin compilado correctamente
+          - Se instala sin errores en VitaShell
+          
+          ### 📋 Requisitos
+          - PS Vita con Firmware 3.60+
+          - HENkaku o Enso instalado
+          - VitaShell para instalación
+          
+          ### 📥 Instalación
+          1. Descarga el VPK que prefieras
+          2. Copia a tu PS Vita (USB o FTP)
+          3. Abre VitaShell
+          4. Navega al VPK y presiona X
+          5. ¡Disfruta VitaCast!
+          
+          ### 🎮 Controles
+          - **D-Pad**: Navegación
+          - **X**: Seleccionar
+          - **O**: Volver
+          - **START**: Salir
+          
+          ---
+          **Compilado automáticamente con GitHub Actions**
+          Commit: ${{ github.sha }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

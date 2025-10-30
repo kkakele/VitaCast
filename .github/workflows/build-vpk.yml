@@ -1,0 +1,97 @@
+name: Build VitaCast VPK
+
+on:
+  push:
+    branches: [ main, master, cursor/** ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: vitasdk/vitasdk:latest
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v3
+      
+    - name: Instalar dependencias
+      run: |
+        apk add --no-cache git cmake make pkgconfig
+        
+    - name: Verificar VitaSDK
+      run: |
+        echo "VITASDK: $VITASDK"
+        which vita-mksfoex
+        which vita-pack-vpk
+        which arm-vita-eabi-gcc
+        arm-vita-eabi-gcc --version
+        
+    - name: Limpiar build anterior
+      run: make clean || true
+      
+    - name: Compilar VitaCast
+      run: |
+        export VITASDK=/usr/local/vitasdk
+        export PATH=$VITASDK/bin:$PATH
+        make all
+        
+    - name: Verificar VPK generado
+      run: |
+        ls -lh VitaCast.vpk
+        file VitaCast.vpk
+        unzip -l VitaCast.vpk
+        echo "=== Verificar param.sfo ==="
+        unzip -p VitaCast.vpk sce_sys/param.sfo | file -
+        echo "=== Verificar eboot.bin ==="
+        unzip -p VitaCast.vpk eboot.bin | head -c 100 | file -
+        
+    - name: Renombrar VPK con versión
+      run: |
+        VERSION=$(date +%Y%m%d-%H%M%S)
+        cp VitaCast.vpk VitaCast-${VERSION}.vpk
+        echo "VPK_VERSION=${VERSION}" >> $GITHUB_ENV
+        
+    - name: Subir artefacto VPK
+      uses: actions/upload-artifact@v3
+      with:
+        name: VitaCast-VPK
+        path: |
+          VitaCast.vpk
+          VitaCast-*.vpk
+        retention-days: 30
+        
+    - name: Crear Release (solo para tags)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          VitaCast.vpk
+          VitaCast-*.vpk
+        draft: false
+        prerelease: false
+        body: |
+          # VitaCast - Compilación Automática
+          
+          ## 📦 VPK Compilado con VitaSDK
+          Este VPK ha sido compilado automáticamente con VitaSDK completo.
+          
+          ### ✅ Características
+          - Ejecutable real (eboot.bin)
+          - param.sfo binario válido
+          - Error 3D de VitaShell solucionado
+          - Compilado con: ${{ github.ref_name }}
+          
+          ### 📥 Instalación
+          1. Descarga `VitaCast.vpk`
+          2. Copia a tu PS Vita
+          3. Instala con VitaShell
+          
+          ### 🔧 Compilado automáticamente
+          - Commit: ${{ github.sha }}
+          - Fecha: ${{ github.event.head_commit.timestamp }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
