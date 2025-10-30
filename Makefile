@@ -1,17 +1,14 @@
 TARGET = VitaCast
-OBJS = main_working.o
+OBJS = main_minimal_safe.o
 
-# Librerías necesarias para vita2d y funcionalidad completa
-LIBS = -lvita2d -lSceDisplay_stub -lSceGxm_stub \
-       -lSceSysmodule_stub -lSceCtrl_stub \
-       -lSceCommonDialog_stub -lfreetype -lpng -ljpeg -lz -lm \
-       -lSceAppMgr_stub -lSceAudio_stub -lScePgf_stub
+# Librerías MÍNIMAS necesarias
+LIBS = -lSceCtrl_stub -lSceDisplay_stub
 
 # VitaSDK paths
 VITASDK ?= .deps/vitasdk
 PREFIX = $(VITASDK)/bin/arm-vita-eabi
 CC = $(PREFIX)-gcc
-CFLAGS = -Wl,-q -Wall -O2 -std=gnu11
+CFLAGS = -Wl,-q -Wall -O2
 VITA_MKSFOEX = $(VITASDK)/bin/vita-mksfoex
 VITA_PACK_VPK = $(VITASDK)/bin/vita-pack-vpk
 
