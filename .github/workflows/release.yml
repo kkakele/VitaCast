@@ -18,12 +18,17 @@ jobs:
       run: |
         apk add --no-cache git cmake make pkgconfig zip
         
-    - name: Compilar VitaCast
+    - name: Compilar VitaCast con CMake
       run: |
         export VITASDK=/usr/local/vitasdk
         export PATH=$VITASDK/bin:$PATH
-        make clean
-        make all
+        mkdir build && cd build
+        cmake ..
+        make
+        
+    - name: Copiar VPK generado
+      run: |
+        cp build/VitaCast.vpk .
         
     - name: Verificar VPK
       run: |
@@ -34,8 +39,8 @@ jobs:
         echo "=== Verificar param.sfo (debe ser binario) ==="
         unzip -p VitaCast.vpk sce_sys/param.sfo | file -
         echo ""
-        echo "=== Verificar eboot.bin (debe ser ejecutable) ==="
-        unzip -p VitaCast.vpk eboot.bin | head -c 100 | file -
+        echo "=== Verificar eboot.bin (debe ser SELF) ==="
+        unzip -p VitaCast.vpk eboot.bin | head -c 16 | xxd
         
     - name: Crear Release
       uses: softprops/action-gh-release@v1
