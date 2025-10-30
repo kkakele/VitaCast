@@ -17,13 +17,35 @@ set(VITA_APP_NAME "VitaCast")
 set(VITA_TITLEID  "VCAST2000")
 set(VITA_VERSION  "02.01")
 
-# OPCIÓN: Usar vita_create_self con UNSAFE como VitaShell
+# Versión COMPLETA con vita2d
 add_executable(${PROJECT_NAME}
-  test_minimal.c
+  main_complete.c
 )
 
 target_link_libraries(${PROJECT_NAME}
+  vita2d
+  freetype
+  png
+  jpeg
+  z
+  m
+  c
+  SceDisplay_stub
+  SceGxm_stub
+  SceSysmodule_stub
+  SceCtrl_stub
+  SceCommonDialog_stub
+  SceAppMgr_stub
+  SceAudio_stub
+  ScePgf_stub
   SceLibKernel_stub
+  curl
+  ssl
+  crypto
+  SceNet_stub
+  SceNetCtl_stub
+  SceSsl_stub
+  SceHttp_stub
 )
 
 # Usar las macros oficiales con UNSAFE
