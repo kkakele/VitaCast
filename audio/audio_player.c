@@ -1,6 +1,6 @@
 #include "audio_player.h"
 #include <stdlib.h>
-#include <vitasdk.h>
+#include <psp2/kernel/threadmgr.h>
 
 typedef struct audio_player_t {
     int dummy;
