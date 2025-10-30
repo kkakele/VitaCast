@@ -19,14 +19,33 @@ set(VITA_TITLEID  "VCAST2000")
 set(VITA_VERSION  "02.01")
 
 add_executable(${PROJECT_NAME}
-  main_minimal_safe.c
+  main_complete.c
 )
 
 target_link_libraries(${PROJECT_NAME}
+  vita2d
+  freetype
+  png
+  jpeg
+  z
+  m
+  c
   SceDisplay_stub
+  SceGxm_stub
+  SceSysmodule_stub
   SceCtrl_stub
+  SceCommonDialog_stub
   SceAppMgr_stub
+  SceAudio_stub
+  ScePgf_stub
   SceLibKernel_stub
+  curl
+  ssl
+  crypto
+  SceNet_stub
+  SceNetCtl_stub
+  SceSsl_stub
+  SceHttp_stub
 )
 
 vita_create_self(${PROJECT_NAME}.self ${PROJECT_NAME})
