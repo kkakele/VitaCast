@@ -5,8 +5,7 @@ OBJS = main_working.o
 LIBS = -lvita2d -lSceDisplay_stub -lSceGxm_stub \
        -lSceSysmodule_stub -lSceCtrl_stub \
        -lSceCommonDialog_stub -lfreetype -lpng -ljpeg -lz -lm \
-       -lSceAppMgr_stub -lSceAudio_stub -lScePgf_stub -lSceFont_stub \
-       -lSceKernelDmacMgr_stub
+       -lSceAppMgr_stub -lSceAudio_stub -lScePgf_stub
 
 # VitaSDK paths
 VITASDK ?= .deps/vitasdk
