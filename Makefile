@@ -31,20 +31,15 @@ $(TARGET).vpk: eboot.bin
 	  -a sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
 	  $(TARGET).vpk
 
-%.velf: %.elf
-	$(VITASDK)/bin/vita-elf-create $< $@
-
-%.self: %.velf
-	$(VITASDK)/bin/vita-make-fself -c $< $@
-
 $(TARGET).elf: $(OBJS)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 
 $(TARGET).velf: $(TARGET).elf
+	arm-vita-eabi-strip -g $<
 	$(VITASDK)/bin/vita-elf-create $< $@
 
 eboot.bin: $(TARGET).velf
-	$(VITASDK)/bin/vita-make-fself -c $< $@
+	$(VITASDK)/bin/vita-make-fself $< $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
