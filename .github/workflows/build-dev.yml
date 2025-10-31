@@ -86,7 +86,7 @@ jobs:
           cat checksums.txt
       
       - name: Subir artefactos de desarrollo
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: vitacast-dev-${{ github.sha }}
           path: |
