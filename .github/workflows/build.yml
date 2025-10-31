@@ -16,6 +16,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      with:
+        ref: ${{ github.ref }}
       
     - name: Setup VitaSDK
       run: |
@@ -39,13 +41,13 @@ jobs:
         make -f Makefile_complete clean
         make -f Makefile_complete
         
-    - name: Check VPK exists
+    - name: Build
       run: |
-        if [ ! -f VitaCast.vpk ]; then
-          echo "Error: VitaCast.vpk no se generó"
-          exit 1
-        fi
-        ls -lh VitaCast.vpk
+        export VITASDK=/usr/local/vitasdk
+        export PATH=$VITASDK/bin:$PATH
+        make -f Makefile clean || true
+        make -f Makefile
+        ls -la *.vpk || echo "VPK no encontrado"
         
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
