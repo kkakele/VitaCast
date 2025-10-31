@@ -1,10 +1,13 @@
 TARGET = VitaCast
 OBJS = main_simple.o
 
-# Bibliotecas necesarias según VitaSDK.org
-LIBS = -lvita2d -lSceDisplay_stub -lSceGxm_stub \
+# Bibliotecas necesarias según VitaSDK.org (orden correcto de linking)
+LIBS = -lvita2d -lSceLibKernel_stub \
+  -lSceDisplay_stub -lSceGxm_stub \
   -lSceSysmodule_stub -lSceCtrl_stub \
-  -lfreetype -lpng -ljpeg -lz -lm -lc
+  -lScePgf_stub -lSceFont_stub -lSceCommonDialog_stub \
+  -lSceAppMgr_stub -lSceSharedFb_stub \
+  -lfreetype -lpng -ljpeg -lz -lm
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
