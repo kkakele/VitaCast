@@ -17,38 +17,37 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
       with:
-        ref: ${{ github.ref }}
-      
+        fetch-depth: 0
+        
     - name: Setup VitaSDK
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential wget
-        wget https://github.com/vitasdk/autobuilds/releases/download/master-linux-v1200/vitasdk-x86_64-linux-gnu-2022-06-08_12-10-10.tar.bz2
-        sudo tar -xf vitasdk-x86_64-linux-gnu-2022-06-08_12-10-10.tar.bz2 -C /usr/local/
+        wget -q https://github.com/vitasdk/autobuilds/releases/download/master-linux-v1200/vitasdk-x86_64-linux-gnu-2022-06-08_12-10-10.tar.bz2 || exit 1
+        sudo tar -xf vitasdk-x86_64-linux-gnu-2022-06-08_12-10-10.tar.bz2 -C /usr/local/ || exit 1
         echo "VITASDK=/usr/local/vitasdk" >> $GITHUB_ENV
         echo "/usr/local/vitasdk/bin" >> $GITHUB_PATH
-        # Instalar dependencias adicionales
-        export VITASDK=/usr/local/vitasdk
-        export PATH=$VITASDK/bin:$PATH
-        /usr/local/vitasdk/bin/vdpm -i vita2d || echo "vita2d ya instalado o no disponible"
-        # Verificar que vita2d esté disponible
-        ls -la /usr/local/vitasdk/arm-vita-eabi/lib/libvita2d.a || echo "vita2d no encontrado, continuando sin él"
         
-    - name: Build
+    - name: Verify tools
       run: |
         export VITASDK=/usr/local/vitasdk
         export PATH=$VITASDK/bin:$PATH
+        which arm-vita-eabi-gcc || exit 1
+        which vita-mksfoex || exit 1
+        which vita-pack-vpk || exit 1
+        echo "✓ Todas las herramientas están disponibles"
+        
+    - name: Build VPK
+      run: |
+        export VITASDK=/usr/local/vitasdk
+        export PATH=$VITASDK/bin:$PATH
+        echo "Limpiando build anterior..."
         make -f Makefile clean || true
-        make -f Makefile
-        ls -lh VitaCast.vpk
-        
-    - name: Check VPK exists
-      run: |
-        if [ ! -f VitaCast.vpk ]; then
-          echo "Error: VitaCast.vpk no se generó"
-          exit 1
-        fi
-        ls -lh VitaCast.vpk
+        echo "Compilando..."
+        make -f Makefile || exit 1
+        echo "✓ Compilación exitosa"
+        ls -lh VitaCast.vpk || exit 1
+        echo "✓ VPK generado correctamente"
         
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
@@ -63,7 +62,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
-    - name: Upload VPK Artifact
+    - name: Upload Artifact
       if: github.event_name == 'workflow_dispatch'
       uses: actions/upload-artifact@v3
       with:
