@@ -1,15 +1,17 @@
 TARGET = VitaCast
 OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o
 
-# Bibliotecas seg?n mejores pr?cticas de VitaSDK
-LIBS = -lvita2d -lSceDisplay_stub -lSceGxm_stub \
-  -lSceSysmodule_stub -lSceCtrl_stub -lScePgf_stub \
-  -lScePvf_stub -lSceCommonDialog_stub \
+# Bibliotecas segun mejores practicas de VitaSDK (orden correcto de linking)
+LIBS = -lvita2d -lSceLibKernel_stub \
+  -lSceDisplay_stub -lSceGxm_stub \
+  -lSceSysmodule_stub -lSceCtrl_stub \
+  -lScePgf_stub -lScePvf_stub \
+  -lSceCommonDialog_stub \
   -lfreetype -lpng -ljpeg -lz \
   -lSceNet_stub -lSceNetCtl_stub -lSceHttp_stub -lSceSsl_stub \
   -lSceAudio_stub -lSceAudioIn_stub \
   -lSceAppUtil_stub -lSceAppMgr_stub \
-  -lm -lc
+  -lm
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
