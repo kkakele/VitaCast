@@ -1,0 +1,137 @@
+name: Build Development
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+      - 'cursor/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    container:
+      image: vitasdk/vitasdk:latest
+    
+    steps:
+      - name: Checkout c?digo
+        uses: actions/checkout@v4
+      
+      - name: Informaci?n del entorno
+        run: |
+          echo "=== Informaci?n del Sistema ==="
+          echo "Usuario: $(whoami)"
+          echo "Directorio: $(pwd)"
+          echo "VITASDK: $VITASDK"
+          echo ""
+          echo "=== Toolchain ==="
+          which arm-vita-eabi-gcc
+          arm-vita-eabi-gcc --version
+          echo ""
+          echo "=== Herramientas Vita ==="
+          which vita-mksfoex
+          which vita-pack-vpk
+      
+      - name: Compilar Versi?n Completa
+        run: |
+          echo "::group::Compilar Makefile_complete"
+          make -f Makefile_complete clean
+          make -f Makefile_complete
+          echo "::endgroup::"
+          
+          if [ -f VitaCast.vpk ]; then
+            echo "::notice::? VitaCast.vpk compilado exitosamente"
+            ls -lh VitaCast.vpk
+          else
+            echo "::error::? No se gener? VitaCast.vpk"
+            exit 1
+          fi
+      
+      - name: Compilar Versi?n Simple
+        run: |
+          echo "::group::Compilar Makefile"
+          make -f Makefile clean
+          make -f Makefile
+          mv VitaCast.vpk VitaCast-Simple.vpk
+          echo "::endgroup::"
+          
+          if [ -f VitaCast-Simple.vpk ]; then
+            echo "::notice::? VitaCast-Simple.vpk compilado exitosamente"
+            ls -lh VitaCast-Simple.vpk
+          else
+            echo "::error::? No se gener? VitaCast-Simple.vpk"
+            exit 1
+          fi
+      
+      - name: Verificar estructura de VPKs
+        run: |
+          echo "=== Contenido de VPKs ==="
+          for vpk in *.vpk; do
+            if [ -f "$vpk" ]; then
+              echo "--- $vpk ---"
+              unzip -l "$vpk" || echo "No se pudo listar $vpk"
+              echo ""
+            fi
+          done
+      
+      - name: Generar checksums
+        run: |
+          echo "=== Checksums SHA256 ==="
+          sha256sum *.vpk > checksums.txt
+          cat checksums.txt
+      
+      - name: Subir artefactos de desarrollo
+        uses: actions/upload-artifact@v3
+        with:
+          name: vitacast-dev-${{ github.sha }}
+          path: |
+            VitaCast-Simple.vpk
+            checksums.txt
+          retention-days: 30
+      
+      - name: Comentar en PR (si aplica)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const checksums = fs.readFileSync('checksums.txt', 'utf8');
+            
+            const comment = `## ?? Build Exitoso
+            
+            ? La compilaci?n se complet? correctamente.
+            
+            ### ?? Artefactos Generados
+            
+            - \`VitaCast-Simple.vpk\` - Disponible en artefactos
+            
+            ### ?? Checksums
+            
+            \`\`\`
+            ${checksums}
+            \`\`\`
+            
+            ### ?? Descargar
+            
+            Los artefactos est?n disponibles en la pesta?a "Actions" de este workflow.
+            
+            ---
+            *Compilado con VitaSDK en GitHub Actions*`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+      
+      - name: Resumen del build
+        run: |
+          echo "::notice::? Build de desarrollo completado"
+          echo "::notice::?? Artefactos guardados por 30 d?as"
+          echo "::notice::?? Revisa la pesta?a Actions para descargarlos"
