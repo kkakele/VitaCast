@@ -26,7 +26,11 @@ jobs:
         echo "VITASDK=/usr/local/vitasdk" >> $GITHUB_ENV
         echo "/usr/local/vitasdk/bin" >> $GITHUB_PATH
         # Instalar dependencias adicionales
+        export VITASDK=/usr/local/vitasdk
+        export PATH=$VITASDK/bin:$PATH
         /usr/local/vitasdk/bin/vdpm -i vita2d || echo "vita2d ya instalado o no disponible"
+        # Verificar que vita2d esté disponible
+        ls -la /usr/local/vitasdk/arm-vita-eabi/lib/libvita2d.a || echo "vita2d no encontrado, continuando sin él"
         
     - name: Build
       run: |
