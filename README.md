@@ -62,11 +62,11 @@ VitaCast/
 ## 🛠️ Requisitos del Sistema
 
 ### Desarrollo
-- **VitaSDK** instalado y configurado
+- **VitaSDK** instalado y configurado (https://vitasdk.org)
 - **arm-vita-eabi-gcc** compilador
 - **vita-mksfoex** y **vita-pack-vpk** para crear VPKs
-- **curl** para funcionalidad de red
-- **vita2d** para gráficos
+- **vita2d** para gráficos 2D
+- **Bibliotecas**: libpng, freetype, zlib (incluidas en VitaSDK)
 
 ### PlayStation Vita
 - **Firmware 3.60+** (recomendado 3.65+)
@@ -77,9 +77,13 @@ VitaCast/
 ## 🚀 Instalación y Compilación
 
 ### Compilación
+
 ```bash
-# Compilar proyecto completo
+# Compilar versión completa con todas las funcionalidades
 make -f Makefile_complete
+
+# Compilar versión simple (básica, sin dependencias extras)
+make -f Makefile
 
 # Compilar versión de debug
 make -f Makefile_complete debug
@@ -90,6 +94,12 @@ make -f Makefile_complete release
 # Limpiar archivos de compilación
 make -f Makefile_complete clean
 ```
+
+### Versiones Disponibles
+
+- **main.c**: Versión completa con audio, red, Apple sync, UI manager
+- **main_simple.c**: Versión básica de demostración
+- **main_final.c**: Versión con UI mejorada sin dependencias externas
 
 ### Instalación en PS Vita
 ```bash
@@ -190,12 +200,31 @@ vita-remote-debugger VitaCast.elf
 - [ ] **Social features**: Compartir podcasts con amigos
 - [ ] **Cloud backup**: Respaldo automático en la nube
 
+## ✅ Mejoras Aplicadas (v2.0.0)
+
+### Basadas en VitaSDK.org
+
+Esta versión incluye mejoras significativas siguiendo las mejores prácticas de [VitaSDK.org](https://vitasdk.org):
+
+- ✅ **Headers PSP2 estándar** en lugar de `vitasdk.h` genérico
+- ✅ **Inicialización correcta de módulos del sistema** (SceNet, SceSysmodule)
+- ✅ **Manejo robusto de memoria** con liberación adecuada de recursos
+- ✅ **Fuentes PGF** para renderizado de texto nativo
+- ✅ **Control de FPS a 60fps** con `sceKernelDelayThread()`
+- ✅ **Terminación correcta** con `sceKernelExitProcess()`
+- ✅ **Makefiles optimizados** con solo bibliotecas necesarias
+- ✅ **Manejo de errores** con códigos de retorno y mensajes de log
+
+Ver [MEJORAS_VITASDK.md](./MEJORAS_VITASDK.md) para detalles completos.
+
 ## 🐛 Problemas Conocidos
 
 - **ATRAC3plus**: Algunos archivos pueden requerir conversión
 - **Red lenta**: Descargas pueden fallar en conexiones lentas
 - **Memoria**: Aplicaciones grandes pueden causar problemas de memoria
 - **iCloud**: Sincronización puede ser lenta en primera configuración
+
+**Nota**: Muchos problemas de estabilidad se han resuelto en v2.0.0 con las mejoras de VitaSDK.
 
 ## 📞 Soporte
 
@@ -216,9 +245,17 @@ Este proyecto está bajo la licencia MIT. Ver archivo LICENSE para más detalles
 ## 🙏 Agradecimientos
 
 - **Sony**: Por crear la PlayStation Vita y sus APIs
-- **VitaSDK**: Por el SDK de desarrollo homebrew
+- **[VitaSDK Team](https://vitasdk.org)**: Por el SDK de desarrollo homebrew
+- **xerpi**: Por la biblioteca vita2d
 - **Apple**: Por las APIs de Apple Music y Podcasts
 - **Comunidad PS Vita**: Por el soporte y feedback continuo
+
+## 📚 Recursos Útiles
+
+- **VitaSDK**: https://vitasdk.org - SDK oficial
+- **vita2d**: https://github.com/xerpi/vita2d - Biblioteca de gráficos 2D
+- **Vita Dev Wiki**: https://vitadevwiki.com - Documentación comunitaria
+- **PSP2 SDK Docs**: https://docs.vitasdk.org - Referencia de APIs
 
 ---
 

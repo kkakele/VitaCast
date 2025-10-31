@@ -1,11 +1,15 @@
 TARGET = VitaCast
 OBJS = main_simple.o
 
-LIBS = -lSceDisplay_stub -lSceCtrl_stub
+# Bibliotecas necesarias según VitaSDK.org
+LIBS = -lvita2d -lSceDisplay_stub -lSceGxm_stub \
+  -lSceSysmodule_stub -lSceCtrl_stub \
+  -lfreetype -lpng -ljpeg -lz -lm -lc
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
-CFLAGS = -Wl,-q -Wall -O2 -std=c99
+CFLAGS = -Wl,-q -Wall -O2 -std=gnu11
+CFLAGS += -D__PSP2__ -DVITA
 
 # VPK metadata (TITLE_ID must be 9 chars)
 TITLE_ID = VCAST2000
