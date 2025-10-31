@@ -56,10 +56,15 @@ network/network_manager.o: network/network_manager.c network/network_manager.h
 apple/apple_sync.o: apple/apple_sync.c apple/apple_sync.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
+# Vita2D Stub (si vita2d no está disponible)
+vita2d_stub.o: vita2d_stub.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
 # Clean target
 clean:
 	rm -rf $(TARGET).vpk eboot.bin param.sfo $(OBJS)
 	rm -rf ui/*.o audio/*.o network/*.o apple/*.o
+	rm -f vita2d_stub.o
 
 # Install target (for development)
 install: $(TARGET).vpk
