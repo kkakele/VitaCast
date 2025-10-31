@@ -1,5 +1,5 @@
 TARGET = VitaCast
-OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o
+OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o vita2d_stub.o
 
 VSDKLIB ?= $(VITASDK)/arm-vita-eabi/lib
 # Intentar usar vita2d si está disponible, sino usar solo las librerías básicas
