@@ -1,5 +1,12 @@
-#include <vitasdk.h>
-#include <vita2d.h>
+#include <psp2/kernel/threadmgr.h>
+#include <stdint.h>
+
+// Stub definitions para vita2d si no está disponible
+typedef struct vita2d_texture {
+    uint32_t dummy;
+} vita2d_texture;
+
+#define RGBA8(r,g,b,a) ((((a)&0xFF)<<24) | (((b)&0xFF)<<16) | (((g)&0xFF)<<8) | (((r)&0xFF)<<0))
 
 int vita2d_init(void) { return 0; }
 int vita2d_fini(void) { return 0; }

@@ -1,7 +1,11 @@
-﻿#include <vitasdk.h>
+#include <psp2/ctrl.h>
+#include <psp2/kernel/threadmgr.h>
+#include <psp2/kernel/processmgr.h>
+#include <psp2/appmgr.h>
 #include <vita2d.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <curl/curl.h>
 #include "ui/ui_manager.h"
@@ -109,6 +113,16 @@ static void vita_cast_render() {
 }
 
 static void vita_cast_update() {
+    // Verificar si se presiona START para salir
+    SceCtrlData pad;
+    sceCtrlPeekBufferPositive(0, &pad, 1);
+    static SceCtrlData old_pad = {0};
+    
+    if ((pad.buttons & SCE_CTRL_START) && !(old_pad.buttons & SCE_CTRL_START)) {
+        app->running = false;
+    }
+    old_pad = pad;
+    
     ui_manager_update(app->ui_manager);
     audio_player_update(app->audio_player);
     network_manager_update(app->network_manager);
@@ -121,7 +135,11 @@ static void vita_cast_update() {
 }
 
 int main() {
+    // Inicializar modo de muestreo de controles
+    sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG);
+    
     if (vita_cast_init() < 0) {
+        sceKernelExitProcess(-1);
         return -1;
     }
     
@@ -129,8 +147,10 @@ int main() {
         vita_cast_update();
         vita_cast_render();
         vita2d_wait_rendering_done();
+        sceKernelDelayThread(16000); // ~60 FPS
     }
     
     vita_cast_cleanup();
+    sceKernelExitProcess(0);
     return 0;
 }

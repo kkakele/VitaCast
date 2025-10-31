@@ -1,17 +1,17 @@
 TARGET = VitaCast
-OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o
+OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o vita2d_stub.o
 
 VSDKLIB ?= $(VITASDK)/arm-vita-eabi/lib
-LIBS = -lvita2d_vgl -lvitaGL -lTinyGL -lmathneon -lvitashark -lSceShaccCgExt \
-  $(VSDKLIB)/libSceShaccCg_stub.a $(VSDKLIB)/libtaihen_stub.a $(VSDKLIB)/libtaihenModuleUtils_stub.a \
-  -lSceGxm_stub -lSceDisplay_stub -lSceCommonDialog_stub -lSceSysmodule_stub -lSceAppMgr_stub \
+# Intentar usar vita2d si está disponible, sino usar solo las librerías básicas
+VITA2D_LIBS := $(shell test -f $(VSDKLIB)/libvita2d.a && echo "-lvita2d" || echo "")
+LIBS = $(VITA2D_LIBS) -lSceGxm_stub -lSceDisplay_stub -lSceCommonDialog_stub -lSceSysmodule_stub -lSceAppMgr_stub \
   -lSceCtrl_stub -lSceNet_stub -lSceNetCtl_stub -lSceIofilemgr_stub -lSceLibKernel_stub \
-  $(VSDKLIB)/libSceKernelDmacMgr_stub.a $(VSDKLIB)/libSceDmacmgrForDriver_stub.a -lSceSsl_stub \
-  -lcurl -lssl -lcrypto -lpng16 -lfreetype -lz -lm
+  -lSceSsl_stub -lcurl -lssl -lcrypto -lpng16 -lfreetype -lz -lm
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
-CFLAGS = -Wl,-q -Wall -O2 -std=c99 -I. -Iui -Iaudio -Inetwork -Iapple
+CFLAGS = -Wall -O2 -std=c99 -I. -Iui -Iaudio -Inetwork -Iapple
+LDFLAGS = -Wl,-q
 
 # Include directories
 INCLUDES = -I. -Iui -Iaudio -Inetwork -Iapple
@@ -30,7 +30,7 @@ $(TARGET).vpk: eboot.bin
 	vita-pack-vpk -s param.sfo -b eboot.bin $(TARGET).vpk
 
 eboot.bin: $(OBJS)
-	$(CC) $(CFLAGS) $^ -Wl,--start-group $(LIBS) -Wl,--end-group -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -Wl,--start-group $(LIBS) -Wl,--end-group -o $@
 
 # Main source
 main.o: main.c
@@ -56,10 +56,15 @@ network/network_manager.o: network/network_manager.c network/network_manager.h
 apple/apple_sync.o: apple/apple_sync.c apple/apple_sync.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
+# Vita2D Stub (si vita2d no está disponible)
+vita2d_stub.o: vita2d_stub.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
 # Clean target
 clean:
 	rm -rf $(TARGET).vpk eboot.bin param.sfo $(OBJS)
 	rm -rf ui/*.o audio/*.o network/*.o apple/*.o
+	rm -f vita2d_stub.o
 
 # Install target (for development)
 install: $(TARGET).vpk

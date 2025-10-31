@@ -1,11 +1,12 @@
 TARGET = VitaCast
 OBJS = main_simple.o
 
-LIBS = -lSceDisplay_stub -lSceCtrl_stub
+LIBS = -lSceDisplay_stub -lSceCtrl_stub -lSceLibKernel_stub
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
-CFLAGS = -Wl,-q -Wall -O2 -std=c99
+CFLAGS = -Wall -O2 -std=c99
+LDFLAGS = -Wl,-q
 
 # VPK metadata (TITLE_ID must be 9 chars)
 TITLE_ID = VCAST2000
@@ -27,7 +28,7 @@ $(TARGET).vpk: eboot.bin
 	  $(TARGET).vpk
 
 eboot.bin: $(OBJS)
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ $(LIBS) -o $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
