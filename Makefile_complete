@@ -1,15 +1,16 @@
 TARGET = VitaCast
 OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o
 
+VITASDK ?= $(PWD)/.deps/vitasdk
 VSDKLIB ?= $(VITASDK)/arm-vita-eabi/lib
-LIBS = -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCommonDialog_stub \
+LIBS = -L$(VSDKLIB) -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCommonDialog_stub \
   -lSceSysmodule_stub -lSceAppMgr_stub -lSceCtrl_stub -lSceNet_stub \
   -lSceNetCtl_stub -lSceIofilemgr_stub -lSceLibKernel_stub -lSceSsl_stub \
   -lcurl -lssl -lcrypto -lpng16 -lfreetype -lz -lm
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
-CFLAGS = -Wl,-q -Wall -O2 -std=c99 -I. -Iui -Iaudio -Inetwork -Iapple
+CFLAGS = -Wl,-q -Wall -O2 -std=c99 -I. -Iui -Iaudio -Inetwork -Iapple -fno-use-linker-plugin
 
 # Include directories
 INCLUDES = -I. -Iui -Iaudio -Inetwork -Iapple
