@@ -37,10 +37,18 @@ static vita_cast_app_t *app = NULL;
 static int vita_cast_init() {
     int ret;
     
-    // Inicializar módulos del sistema necesarios según VitaSDK
-    sceSysmoduleLoadModule(SCE_SYSMODULE_NET);
+    // PASO 1: Cargar modulos del sistema PRIMERO
+    ret = sceSysmoduleLoadModule(SCE_SYSMODULE_NET);
+    if (ret < 0) {
+        printf("Error cargando modulo NET: 0x%08X\n", ret);
+    }
     
-    // Inicializar red
+    ret = sceSysmoduleLoadModule(SCE_SYSMODULE_PGF);
+    if (ret < 0) {
+        printf("Error cargando modulo PGF: 0x%08X\n", ret);
+    }
+    
+    // PASO 2: Inicializar red
     SceNetInitParam netInitParam;
     netInitParam.memory = net_mem;
     netInitParam.size = NET_INIT_SIZE;
@@ -55,11 +63,14 @@ static int vita_cast_init() {
         printf("Error al inicializar netctl: 0x%08X\n", ret);
     }
     
-    // Inicializar vita2d para gráficos
+    // PASO 3: Inicializar controladores
+    sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG);
+    
+    // PASO 4: Inicializar vita2d para graficos
     vita2d_init();
     vita2d_set_clear_color(RGBA8(0x00, 0x00, 0x00, 0xFF));
     
-    // Alocar memoria para la app
+    // PASO 5: Alocar memoria para la app
     app = malloc(sizeof(vita_cast_app_t));
     if (!app) {
         printf("Error: no se pudo alocar memoria para la app\n");
@@ -70,13 +81,13 @@ static int vita_cast_init() {
     app->running = true;
     app->current_state = APP_STATE_MAIN_MENU;
     
-    // Cargar fuente PGF para texto
+    // PASO 6: Cargar fuente PGF para texto
     app->font = vita2d_load_default_pgf();
     if (!app->font) {
         printf("Advertencia: no se pudo cargar la fuente\n");
     }
     
-    // Crear managers
+    // PASO 7: Crear managers
     app->ui_manager = ui_manager_create();
     app->audio_player = audio_player_create();
     app->network_manager = network_manager_create();
@@ -88,10 +99,10 @@ static int vita_cast_init() {
         return -1;
     }
     
-    // Conectar a la red
+    // PASO 8: Conectar a la red
     network_manager_connect(app->network_manager);
     
-    // Intentar cargar textura de fondo
+    // PASO 9: Intentar cargar textura de fondo
     app->background_texture = vita2d_load_PNG_file("app0:/assets/background.png");
     if (!app->background_texture) {
         printf("Advertencia: no se pudo cargar background.png\n");
@@ -132,7 +143,8 @@ static void vita_cast_cleanup() {
     sceNetCtlTerm();
     sceNetTerm();
     
-    // Descargar módulos del sistema
+    // Descargar modulos del sistema
+    sceSysmoduleUnloadModule(SCE_SYSMODULE_PGF);
     sceSysmoduleUnloadModule(SCE_SYSMODULE_NET);
     
     printf("VitaCast finalizado correctamente\n");
@@ -149,7 +161,7 @@ static void vita_cast_render() {
         vita2d_draw_rectangle(0, 0, 960, 544, RGBA8(0x1a, 0x1a, 0x1a, 0xFF));
     }
     
-    // Título de la app
+    // Titulo de la app
     if (app->font) {
         vita2d_pgf_draw_text(app->font, 30, 50, 
             RGBA8(0xFF, 0xFF, 0xFF, 0xFF), 1.5f, APP_TITLE);
@@ -160,7 +172,7 @@ static void vita_cast_render() {
             RGBA8(0xAA, 0xAA, 0xAA, 0xFF), 0.8f, version);
     }
     
-    // Renderizar según el estado actual
+    // Renderizar segun el estado actual
     switch (app->current_state) {
         case APP_STATE_MAIN_MENU:
             ui_manager_render_main_menu(app->ui_manager);
@@ -231,7 +243,7 @@ int main(int argc, char *argv[]) {
     printf("Iniciando %s %s...\n", APP_TITLE, APP_VERSION);
     
     if (vita_cast_init() < 0) {
-        printf("Error: fallo al inicializar la aplicación\n");
+        printf("Error: fallo al inicializar la aplicacion\n");
         vita_cast_cleanup();
         sceKernelDelayThread(3 * 1000000); // Esperar 3 segundos para ver el error
         sceKernelExitProcess(0);
