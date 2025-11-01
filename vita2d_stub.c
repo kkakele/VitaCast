@@ -1,6 +1,11 @@
 #include <vitasdk.h>
 #include <vita2d.h>
 
+// Definir tipo si no est? definido en vita2d.h
+#ifndef _VITA2D_H
+typedef void vita2d_texture;
+#endif
+
 int vita2d_init(void) { return 0; }
 int vita2d_fini(void) { return 0; }
 void vita2d_wait_rendering_done(void) {}
