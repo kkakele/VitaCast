@@ -1,6 +1,6 @@
 #include "ui_manager.h"
 #include <vitasdk.h>
-#include <vita2d.h>
+#include "../vita2d_stub.h"  // Usar stub en lugar de librer?a vita2d
 #include <stdlib.h>
 #include <string.h>
 
