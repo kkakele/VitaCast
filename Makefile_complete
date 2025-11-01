@@ -2,11 +2,9 @@ TARGET = VitaCast
 OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o
 
 VSDKLIB ?= $(VITASDK)/arm-vita-eabi/lib
-LIBS = -lvita2d_vgl -lvitaGL -lTinyGL -lmathneon -lvitashark -lSceShaccCgExt \
-  $(VSDKLIB)/libSceShaccCg_stub.a $(VSDKLIB)/libtaihen_stub.a $(VSDKLIB)/libtaihenModuleUtils_stub.a \
-  -lSceGxm_stub -lSceDisplay_stub -lSceCommonDialog_stub -lSceSysmodule_stub -lSceAppMgr_stub \
-  -lSceCtrl_stub -lSceNet_stub -lSceNetCtl_stub -lSceIofilemgr_stub -lSceLibKernel_stub \
-  $(VSDKLIB)/libSceKernelDmacMgr_stub.a $(VSDKLIB)/libSceDmacmgrForDriver_stub.a -lSceSsl_stub \
+LIBS = -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCommonDialog_stub \
+  -lSceSysmodule_stub -lSceAppMgr_stub -lSceCtrl_stub -lSceNet_stub \
+  -lSceNetCtl_stub -lSceIofilemgr_stub -lSceLibKernel_stub -lSceSsl_stub \
   -lcurl -lssl -lcrypto -lpng16 -lfreetype -lz -lm
 
 PREFIX = arm-vita-eabi
@@ -27,7 +25,13 @@ all: $(TARGET).vpk
 $(TARGET).vpk: eboot.bin
 	# TITLE_ID debe tener 9 caracteres
 	vita-mksfoex -s TITLE_ID=VCAST2000 -s APP_VER=02.00 -s CONTENT_ID=UP0000-VCAST2000_00-0000000000000000 "$(TARGET)" param.sfo
-	vita-pack-vpk -s param.sfo -b eboot.bin $(TARGET).vpk
+	vita-pack-vpk -s param.sfo -b eboot.bin \
+	  -a sce_sys/icon0.png=sce_sys/icon0.png \
+	  -a sce_sys/livearea/contents/bg.png=sce_sys/livearea/contents/bg.png \
+	  -a sce_sys/livearea/contents/bg0.png=sce_sys/livearea/contents/bg0.png \
+	  -a sce_sys/livearea/contents/startup.png=sce_sys/livearea/contents/startup.png \
+	  -a sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
+	  $(TARGET).vpk
 
 eboot.bin: $(OBJS)
 	$(CC) $(CFLAGS) $^ -Wl,--start-group $(LIBS) -Wl,--end-group -o $@
