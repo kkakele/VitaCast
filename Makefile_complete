@@ -23,8 +23,12 @@ APPLE_DIR = apple
 all: $(TARGET).vpk
 
 $(TARGET).vpk: eboot.bin
-	# TITLE_ID debe tener 9 caracteres
-	vita-mksfoex -s TITLE_ID=VCAST2000 -s APP_VER=02.00 -s CONTENT_ID=UP0000-VCAST2000_00-0000000000000000 "$(TARGET)" param.sfo
+	# TITLE_ID debe tener 9 caracteres exactamente
+	# CONTENT_ID debe seguir formato: PCSEXXXXX para homebrew (no UP0000...)
+	# Esto corrige el error 0x8010113D en VitaShell
+	vita-mksfoex -s TITLE_ID=VCAST2000 -s APP_VER=02.00 -s CONTENT_ID=PCSE00001 "$(TARGET)" param.sfo
+	# Verificar que param.sfo se gener? correctamente
+	@test -f param.sfo || (echo "Error: param.sfo no se gener?" && exit 1)
 	vita-pack-vpk -s param.sfo -b eboot.bin \
 	  -a sce_sys/icon0.png=sce_sys/icon0.png \
 	  -a sce_sys/livearea/contents/bg.png=sce_sys/livearea/contents/bg.png \
@@ -32,6 +36,7 @@ $(TARGET).vpk: eboot.bin
 	  -a sce_sys/livearea/contents/startup.png=sce_sys/livearea/contents/startup.png \
 	  -a sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
 	  $(TARGET).vpk
+	@echo "VPK generado correctamente: $(TARGET).vpk"
 
 eboot.bin: $(OBJS)
 	$(CC) $(CFLAGS) $^ -Wl,--start-group $(LIBS) -Wl,--end-group -o $@
