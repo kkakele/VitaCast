@@ -1,0 +1,201 @@
+name: Build VitaCast and Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Se activa con tags tipo v2.0.0
+  workflow_dispatch:  # Permite ejecutar manualmente
+    inputs:
+      version:
+        description: 'Versi?n del release (ej: 2.0.0)'
+        required: true
+        default: '2.0.0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: vitasdk/vitasdk:latest
+    
+    steps:
+      - name: Checkout c?digo
+        uses: actions/checkout@v4
+      
+      - name: Verificar VitaSDK
+        run: |
+          echo "VITASDK: $VITASDK"
+          echo "PATH: $PATH"
+          which arm-vita-eabi-gcc || echo "Compilador no encontrado"
+          arm-vita-eabi-gcc --version || echo "No se puede ejecutar gcc"
+      
+      - name: Compilar VitaCast (Versi?n Completa)
+        run: |
+          echo "Compilando versi?n completa..."
+          make -f Makefile_complete clean
+          make -f Makefile_complete
+          ls -lh VitaCast.vpk || echo "VPK no generado"
+      
+      - name: Compilar VitaCast (Versi?n Simple)
+        run: |
+          echo "Compilando versi?n simple..."
+          make -f Makefile clean
+          make -f Makefile
+          mv VitaCast.vpk VitaCast-Simple.vpk || echo "No se pudo renombrar"
+          ls -lh VitaCast-Simple.vpk || echo "VPK simple no generado"
+      
+      - name: Recompilar versi?n completa
+        run: |
+          echo "Recompilando versi?n completa para release..."
+          make -f Makefile_complete clean
+          make -f Makefile_complete
+          ls -lh VitaCast.vpk
+      
+      - name: Verificar archivos generados
+        run: |
+          echo "=== Archivos generados ==="
+          ls -lh *.vpk || echo "No se encontraron VPKs"
+          file *.vpk || echo "No se pueden inspeccionar VPKs"
+      
+      - name: Subir VPK como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitacast-vpks
+          path: |
+            VitaCast.vpk
+            VitaCast-Simple.vpk
+          if-no-files-found: warn
+  
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout c?digo
+        uses: actions/checkout@v4
+      
+      - name: Descargar artefactos
+        uses: actions/download-artifact@v4
+        with:
+          name: vitacast-vpks
+          path: ./releases
+      
+      - name: Obtener versi?n
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION=${GITHUB_REF#refs/tags/v}
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Versi?n: $VERSION"
+      
+      - name: Generar notas del release
+        id: release_notes
+        run: |
+          cat > release_notes.md << 'EOF'
+          # ?? VitaCast v${{ steps.get_version.outputs.VERSION }}
+          
+          ## ?? Descargas
+          
+          - **VitaCast.vpk** - Versi?n completa con todas las funcionalidades
+          - **VitaCast-Simple.vpk** - Versi?n b?sica simplificada
+          
+          ## ? Caracter?sticas v2.0.0
+          
+          ### Mejoras Principales
+          - ? **Headers PSP2 est?ndar** seg?n VitaSDK.org
+          - ? **Fuentes PGF nativas** para texto legible
+          - ? **UI mejorada** con men?s navegables
+          - ? **Inicializaci?n correcta** de m?dulos del sistema
+          - ? **Manejo robusto** de errores y memoria
+          - ? **Control de FPS** a 60fps
+          - ? **Terminaci?n correcta** del proceso
+          
+          ### Archivos Incluidos
+          
+          | Archivo | Descripci?n | Tama?o |
+          |---------|-------------|--------|
+          | VitaCast.vpk | Versi?n completa | ~500KB |
+          | VitaCast-Simple.vpk | Versi?n b?sica | ~200KB |
+          
+          ## ?? Requisitos
+          
+          - **PS Vita**: Firmware 3.60+ (recomendado 3.65+)
+          - **HENkaku/Enso**: Requerido
+          - **Espacio**: ~100MB para cach?
+          
+          ## ?? Instalaci?n
+          
+          1. Descarga el archivo VPK que prefieras
+          2. Transfiere a tu PS Vita usando VitaShell
+          3. Instala el VPK
+          4. ?Disfruta VitaCast!
+          
+          ## ?? Controles
+          
+          - **D-Pad**: Navegar por men?s
+          - **X**: Seleccionar opci?n
+          - **O**: Volver al men? anterior
+          - **START**: Salir de la aplicaci?n
+          
+          ## ?? Mejoras T?cnicas
+          
+          Esta versi?n incluye una revisi?n completa del c?digo siguiendo las mejores pr?cticas de [VitaSDK.org](https://vitasdk.org):
+          
+          - Inicializaci?n correcta de m?dulos del sistema (SceNet, SceSysmodule)
+          - Uso de fuentes PGF para renderizado de texto nativo
+          - Manejo robusto de memoria y recursos
+          - Control de framerate a 60 FPS
+          - Terminaci?n correcta con sceKernelExitProcess()
+          
+          Ver [MEJORAS_VITASDK.md](https://github.com/${{ github.repository }}/blob/main/MEJORAS_VITASDK.md) para detalles completos.
+          
+          ## ?? Documentaci?n
+          
+          - [README.md](https://github.com/${{ github.repository }}/blob/main/README.md) - Documentaci?n principal
+          - [MEJORAS_VITASDK.md](https://github.com/${{ github.repository }}/blob/main/MEJORAS_VITASDK.md) - Gu?a t?cnica detallada
+          - [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) - Historial de cambios
+          
+          ## ?? Problemas Conocidos
+          
+          - Funcionalidad de red a?n en desarrollo
+          - Audio player en implementaci?n
+          - Integraci?n con Apple Music pendiente
+          
+          ## ?? Agradecimientos
+          
+          - **VitaSDK Team** - Por el SDK de desarrollo
+          - **xerpi** - Por la biblioteca vita2d
+          - **Comunidad PS Vita** - Por el soporte continuo
+          
+          ---
+          
+          **Compilado con VitaSDK** | **Siguiendo mejores pr?cticas de vitasdk.org** ??
+          EOF
+          
+          cat release_notes.md
+      
+      - name: Crear Release en GitHub
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.get_version.outputs.VERSION }}
+          name: VitaCast v${{ steps.get_version.outputs.VERSION }}
+          body_path: release_notes.md
+          files: |
+            releases/VitaCast.vpk
+            releases/VitaCast-Simple.vpk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Resumen del Release
+        run: |
+          echo "::notice::? Release v${{ steps.get_version.outputs.VERSION }} creado exitosamente"
+          echo "::notice::?? Archivos subidos: VitaCast.vpk, VitaCast-Simple.vpk"
+          echo "::notice::?? URL: https://github.com/${{ github.repository }}/releases/tag/v${{ steps.get_version.outputs.VERSION }}"

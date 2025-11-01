@@ -1,11 +1,18 @@
 TARGET = VitaCast
 OBJS = main_simple.o
 
-LIBS = -lSceDisplay_stub -lSceCtrl_stub
+# Bibliotecas necesarias segun VitaSDK.org (orden correcto de linking)
+LIBS = -lvita2d -lSceLibKernel_stub \
+  -lSceDisplay_stub -lSceGxm_stub \
+  -lSceSysmodule_stub -lSceCtrl_stub \
+  -lScePgf_stub -lSceCommonDialog_stub \
+  -lSceAppMgr_stub \
+  -lfreetype -lpng -ljpeg -lz -lm
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
-CFLAGS = -Wl,-q -Wall -O2 -std=c99
+CFLAGS = -Wl,-q -Wall -O2 -std=gnu11
+CFLAGS += -D__PSP2__ -DVITA
 
 # VPK metadata (TITLE_ID must be 9 chars)
 TITLE_ID = VCAST2000
@@ -14,9 +21,7 @@ CONTENT_ID = UP0000-$(TITLE_ID)_00-0000000000000000
 
 all: $(TARGET).vpk
 
-$(TARGET).vpk: eboot.bin
-	# Generar param.sfo con metadatos válidos para VitaShell
-	vita-mksfoex -s TITLE_ID=$(TITLE_ID) -s APP_VER=$(APP_VER) -s CONTENT_ID=$(CONTENT_ID) "$(TARGET)" param.sfo
+$(TARGET).vpk: eboot.bin param.sfo
 	# Empaquetar VPK incluyendo recursos esenciales de sce_sys
 	vita-pack-vpk -s param.sfo -b eboot.bin \
 	  -a sce_sys/icon0.png=sce_sys/icon0.png \
@@ -26,13 +31,23 @@ $(TARGET).vpk: eboot.bin
 	  -a sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
 	  $(TARGET).vpk
 
-eboot.bin: $(OBJS)
+param.sfo:
+	# Generar param.sfo con metadatos válidos para VitaShell
+	vita-mksfoex -s TITLE_ID=$(TITLE_ID) -s APP_VER=$(APP_VER) -s CONTENT_ID=$(CONTENT_ID) "$(TARGET)" param.sfo
+
+eboot.bin: $(TARGET).velf
+	vita-make-fself -c -s $< $@
+
+$(TARGET).velf: $(TARGET).elf
+	vita-elf-create $< $@
+
+$(TARGET).elf: $(OBJS)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(TARGET).vpk eboot.bin param.sfo $(OBJS)
+	rm -rf $(TARGET).vpk $(TARGET).velf $(TARGET).elf eboot.bin param.sfo $(OBJS)
 
 .PHONY: clean all

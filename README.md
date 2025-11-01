@@ -1,5 +1,10 @@
 # VitaCast - Podcast & Music App for PlayStation Vita
 
+![Build Status](https://github.com/YOUR_USERNAME/YOUR_REPO/workflows/Build%20Development/badge.svg)
+![Release](https://github.com/YOUR_USERNAME/YOUR_REPO/workflows/Build%20VitaCast%20and%20Create%20Release/badge.svg)
+![Version](https://img.shields.io/badge/version-2.0.0-blue)
+![Platform](https://img.shields.io/badge/platform-PS%20Vita-purple)
+
 VitaCast es una aplicación completa de podcast y música para PlayStation Vita que combina la funcionalidad moderna de streaming con la estética clásica de la aplicación oficial de música de PS Vita.
 
 ## 🎵 Características Principales
@@ -62,11 +67,11 @@ VitaCast/
 ## 🛠️ Requisitos del Sistema
 
 ### Desarrollo
-- **VitaSDK** instalado y configurado
+- **VitaSDK** instalado y configurado (https://vitasdk.org)
 - **arm-vita-eabi-gcc** compilador
 - **vita-mksfoex** y **vita-pack-vpk** para crear VPKs
-- **curl** para funcionalidad de red
-- **vita2d** para gráficos
+- **vita2d** para gráficos 2D
+- **Bibliotecas**: libpng, freetype, zlib (incluidas en VitaSDK)
 
 ### PlayStation Vita
 - **Firmware 3.60+** (recomendado 3.65+)
@@ -76,10 +81,43 @@ VitaCast/
 
 ## 🚀 Instalación y Compilación
 
-### Compilación
+### 📦 Descarga Rápida (Recomendado)
+
+**¿Solo quieres instalar la app?** Descarga el VPK compilado desde [Releases](../../releases):
+
+1. Ve a [Releases](../../releases)
+2. Descarga `VitaCast.vpk` (versión completa) o `VitaCast-Simple.vpk` (básica)
+3. Transfiere a tu PS Vita con VitaShell
+4. Instala y ¡disfruta!
+
+### 🤖 Compilación Automática con GitHub Actions
+
+Este proyecto usa **GitHub Actions** para compilar automáticamente:
+
+#### Crear un Release:
 ```bash
-# Compilar proyecto completo
+# Método 1: Con tag (automático)
+git tag v2.0.0
+git push origin v2.0.0
+
+# Método 2: Manual desde GitHub
+# GitHub → Actions → "Build and Release" → Run workflow
+```
+
+**Resultado**: Release automático con VPKs en ~5 minutos.
+
+📖 **Guía completa**: Ver [`.github/QUICK_START.md`](.github/QUICK_START.md)
+
+### 🛠️ Compilación Local (Desarrolladores)
+
+Si tienes VitaSDK instalado localmente:
+
+```bash
+# Compilar versión completa con todas las funcionalidades
 make -f Makefile_complete
+
+# Compilar versión simple (básica, sin dependencias extras)
+make -f Makefile
 
 # Compilar versión de debug
 make -f Makefile_complete debug
@@ -90,6 +128,12 @@ make -f Makefile_complete release
 # Limpiar archivos de compilación
 make -f Makefile_complete clean
 ```
+
+### 📁 Versiones Disponibles
+
+- **main.c**: Versión completa con audio, red, Apple sync, UI manager
+- **main_simple.c**: Versión básica de demostración
+- **main_final.c**: Versión con UI mejorada sin dependencias externas
 
 ### Instalación en PS Vita
 ```bash
@@ -190,12 +234,31 @@ vita-remote-debugger VitaCast.elf
 - [ ] **Social features**: Compartir podcasts con amigos
 - [ ] **Cloud backup**: Respaldo automático en la nube
 
+## ✅ Mejoras Aplicadas (v2.0.0)
+
+### Basadas en VitaSDK.org
+
+Esta versión incluye mejoras significativas siguiendo las mejores prácticas de [VitaSDK.org](https://vitasdk.org):
+
+- ✅ **Headers PSP2 estándar** en lugar de `vitasdk.h` genérico
+- ✅ **Inicialización correcta de módulos del sistema** (SceNet, SceSysmodule)
+- ✅ **Manejo robusto de memoria** con liberación adecuada de recursos
+- ✅ **Fuentes PGF** para renderizado de texto nativo
+- ✅ **Control de FPS a 60fps** con `sceKernelDelayThread()`
+- ✅ **Terminación correcta** con `sceKernelExitProcess()`
+- ✅ **Makefiles optimizados** con solo bibliotecas necesarias
+- ✅ **Manejo de errores** con códigos de retorno y mensajes de log
+
+Ver [MEJORAS_VITASDK.md](./MEJORAS_VITASDK.md) para detalles completos.
+
 ## 🐛 Problemas Conocidos
 
 - **ATRAC3plus**: Algunos archivos pueden requerir conversión
 - **Red lenta**: Descargas pueden fallar en conexiones lentas
 - **Memoria**: Aplicaciones grandes pueden causar problemas de memoria
 - **iCloud**: Sincronización puede ser lenta en primera configuración
+
+**Nota**: Muchos problemas de estabilidad se han resuelto en v2.0.0 con las mejoras de VitaSDK.
 
 ## 📞 Soporte
 
@@ -216,9 +279,23 @@ Este proyecto está bajo la licencia MIT. Ver archivo LICENSE para más detalles
 ## 🙏 Agradecimientos
 
 - **Sony**: Por crear la PlayStation Vita y sus APIs
-- **VitaSDK**: Por el SDK de desarrollo homebrew
+- **[VitaSDK Team](https://vitasdk.org)**: Por el SDK de desarrollo homebrew
+- **xerpi**: Por la biblioteca vita2d
 - **Apple**: Por las APIs de Apple Music y Podcasts
 - **Comunidad PS Vita**: Por el soporte y feedback continuo
+
+## 📚 Recursos Útiles
+
+### Para Usuarios
+- **[Releases](../../releases)** - Descargar VPKs compilados
+- **[Quick Start](.github/QUICK_START.md)** - Guía rápida para crear releases
+
+### Para Desarrolladores
+- **[VitaSDK](https://vitasdk.org)** - SDK oficial
+- **[vita2d](https://github.com/xerpi/vita2d)** - Biblioteca de gráficos 2D
+- **[Vita Dev Wiki](https://vitadevwiki.com)** - Documentación comunitaria
+- **[PSP2 SDK Docs](https://docs.vitasdk.org)** - Referencia de APIs
+- **[GitHub Actions Guide](.github/GITHUB_ACTIONS_GUIDE.md)** - Automatización CI/CD
 
 ---
 
