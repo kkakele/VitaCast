@@ -4,11 +4,11 @@
 #include <string.h>
 #include <stdbool.h>
 #include <curl/curl.h>
-// #include <vita2d.h>  // Comentado temporalmente para compilaci?n b?sica
+#include "vita2d_stub.h"  // Header stub con declaraciones de vita2d
 #include "ui/ui_manager.h"
 #include "audio/audio_player.h"
 #include "network/network_manager.h"
-// #include "apple/apple_sync.h"  // Comentado temporalmente para prueba
+#include "apple/apple_sync.h"
 
 #define APP_TITLE "VitaCast"
 #define APP_VERSION "2.0.0"
