@@ -1,4 +1,5 @@
 TARGET = VitaCast
+# Objetos a compilar - apple_sync es simple y no deber?a causar problemas
 OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o vita2d_stub.o
 
 VITASDK ?= /usr/local/vitasdk
