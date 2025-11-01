@@ -46,7 +46,13 @@ param.sfo:
 	  -s CONTENT_ID=UP0000-VCAST2000_00-0000000000000000 \
 	  "$(TARGET)" param.sfo
 
-eboot.bin: $(OBJS)
+eboot.bin: $(TARGET).velf
+	vita-make-fself -c -s $< $@
+
+$(TARGET).velf: $(TARGET).elf
+	vita-elf-create $< $@
+
+$(TARGET).elf: $(OBJS)
 	$(CC) $(CFLAGS) $^ -Wl,--start-group $(LIBS) -Wl,--end-group -o $@
 
 # Main source
@@ -75,7 +81,7 @@ apple/apple_sync.o: apple/apple_sync.c apple/apple_sync.h
 
 # Clean target
 clean:
-	rm -rf $(TARGET).vpk eboot.bin param.sfo $(OBJS)
+	rm -rf $(TARGET).vpk $(TARGET).velf $(TARGET).elf eboot.bin param.sfo $(OBJS)
 	rm -rf ui/*.o audio/*.o network/*.o apple/*.o
 
 # Install target (for development)
