@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define APP_TITLE "VitaCast"
 #define APP_VERSION "1.0.0"

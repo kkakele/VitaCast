@@ -4,11 +4,12 @@
 #include <string.h>
 #include <stdbool.h>
 #include <curl/curl.h>
-#include "vita2d_stub.h"  // Header stub con declaraciones de vita2d
+#include <vita2d.h>  // Usar stub si la librer?a no est? disponible
 #include "ui/ui_manager.h"
 #include "audio/audio_player.h"
 #include "network/network_manager.h"
-#include "apple/apple_sync.h"
+// #include "apple/apple_sync.h"  // COMENTADO para prueba
+// #include "audio/atrac_decoder.h"  // COMENTADO para prueba
 
 #define APP_TITLE "VitaCast"
 #define APP_VERSION "2.0.0"
@@ -20,7 +21,7 @@ typedef struct {
     ui_manager_t *ui_manager;
     audio_player_t *audio_player;
     network_manager_t *network_manager;
-    apple_sync_t *apple_sync;
+    // apple_sync_t *apple_sync;  // COMENTADO para prueba
 } vita_cast_app_t;
 
 static vita_cast_app_t *app = NULL;
@@ -40,10 +41,10 @@ static int vita_cast_init() {
     app->ui_manager = ui_manager_create();
     app->audio_player = audio_player_create();
     app->network_manager = network_manager_create();
-    app->apple_sync = apple_sync_create();
+    // app->apple_sync = apple_sync_create();  // COMENTADO para prueba
     
     if (!app->ui_manager || !app->audio_player || 
-        !app->network_manager || !app->apple_sync) {
+        !app->network_manager) {  // Removido apple_sync
         return -1;
     }
     
@@ -62,7 +63,7 @@ static void vita_cast_cleanup() {
         if (app->ui_manager) ui_manager_destroy(app->ui_manager);
         if (app->audio_player) audio_player_destroy(app->audio_player);
         if (app->network_manager) network_manager_destroy(app->network_manager);
-        if (app->apple_sync) apple_sync_destroy(app->apple_sync);
+        // if (app->apple_sync) apple_sync_destroy(app->apple_sync);  // COMENTADO
         
         free(app);
     }
@@ -113,7 +114,7 @@ static void vita_cast_update() {
     ui_manager_update(app->ui_manager);
     audio_player_update(app->audio_player);
     network_manager_update(app->network_manager);
-    apple_sync_update(app->apple_sync);
+    // apple_sync_update(app->apple_sync);  // COMENTADO para prueba
     
     app_state_t new_state = ui_manager_get_requested_state(app->ui_manager);
     if (new_state != app->current_state) {

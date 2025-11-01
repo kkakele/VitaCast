@@ -1,0 +1,62 @@
+TARGET = VitaCast
+# Versi?n simplificada sin ATRAC ni Apple para probar
+OBJS = main.o ui/ui_manager.o audio/audio_player.o network/network_manager.o vita2d_stub.o
+
+VITASDK ?= /usr/local/vitasdk
+VSDKLIB ?= $(VITASDK)/arm-vita-eabi/lib
+# Librer?as b?sicas necesarias
+LIBS = -lSceGxm_stub -lSceDisplay_stub -lSceCommonDialog_stub \
+  -lSceSysmodule_stub -lSceAppMgr_stub -lSceCtrl_stub -lSceNet_stub \
+  -lSceNetCtl_stub -lSceIofilemgr_stub -lSceLibKernel_stub -lSceSsl_stub \
+  -lcurl -lssl -lcrypto -lpng16 -lfreetype -lz -lm
+
+PREFIX = arm-vita-eabi
+CC = $(PREFIX)-gcc
+CFLAGS = -Wl,-q -Wall -O2 -std=c99 -I. -Iui -Iaudio -Inetwork -fno-use-linker-plugin
+
+# Include directories
+INCLUDES = -I. -Iui -Iaudio -Inetwork
+
+all: $(TARGET).vpk
+
+$(TARGET).vpk: eboot.bin
+	# CONTENT_ID correcto para homebrew
+	vita-mksfoex -s TITLE_ID=VCAST2000 -s APP_VER=02.00 -s CONTENT_ID=PCSE00001 "$(TARGET)" param.sfo
+	@test -f param.sfo || (echo "Error: param.sfo no se gener?" && exit 1)
+	vita-pack-vpk -s param.sfo -b eboot.bin \
+	  -a sce_sys/icon0.png=sce_sys/icon0.png \
+	  -a sce_sys/livearea/contents/bg.png=sce_sys/livearea/contents/bg.png \
+	  -a sce_sys/livearea/contents/bg0.png=sce_sys/livearea/contents/bg0.png \
+	  -a sce_sys/livearea/contents/startup.png=sce_sys/livearea/contents/startup.png \
+	  -a sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
+	  $(TARGET).vpk
+	@echo "VPK generado correctamente: $(TARGET).vpk"
+
+eboot.bin: $(OBJS)
+	$(CC) $(CFLAGS) $^ -Wl,--start-group $(LIBS) -Wl,--end-group -o $@
+
+# Main source
+main.o: main.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+# UI Manager
+ui/ui_manager.o: ui/ui_manager.c ui/ui_manager.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+# Audio Player
+audio/audio_player.o: audio/audio_player.c audio/audio_player.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+# Network Manager
+network/network_manager.o: network/network_manager.c network/network_manager.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+# Vita2D Stub
+vita2d_stub.o: vita2d_stub.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+clean:
+	rm -rf $(TARGET).vpk eboot.bin param.sfo $(OBJS)
+	rm -rf ui/*.o audio/*.o network/*.o
+
+.PHONY: clean all
