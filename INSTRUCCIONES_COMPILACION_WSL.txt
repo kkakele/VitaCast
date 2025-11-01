@@ -1,0 +1,63 @@
+# 🚀 INSTRUCCIONES DE COMPILACIÓN EN WSL
+
+## ⚠️ IMPORTANTE: Pasos Exactos
+
+### 1. Actualizar el repositorio (OBLIGATORIO)
+```bash
+cd ~/VitaCast
+git pull origin cursor/investigar-y-arreglar-errores-de-vitacast-y-vitasdk-fd06
+# O simplemente:
+git pull
+```
+
+### 2. Verificar que tienes el Makefile corregido
+```bash
+grep "vita2d_stub" Makefile_complete
+# Debe mostrar: OBJS = ... vita2d_stub.o
+```
+
+### 3. Limpiar completamente
+```bash
+make -f Makefile_complete clean
+rm -f *.o */*.o  # Asegurar que no hay objetos antiguos
+```
+
+### 4. Compilar
+```bash
+export VITASDK=/usr/local/vitasdk
+export PATH=$VITASDK/bin:$PATH
+
+make -f Makefile_complete release
+```
+
+## 🔍 Si Sigue Dando Error de vita2d_vgl
+
+El Makefile puede estar en caché. Haz esto:
+
+```bash
+# Ver contenido actual del Makefile
+cat Makefile_complete | grep -A5 "LIBS"
+
+# Si ves "vita2d_vgl", el Makefile NO se actualizó. Haz:
+git checkout Makefile_complete
+git pull
+```
+
+## ✅ Verificación Final
+
+Después de compilar:
+```bash
+# Verificar que el VPK se generó
+ls -lh VitaCast.vpk
+
+# Verificar CONTENT_ID correcto
+unzip -p VitaCast.vpk sce_sys/param.sfo | strings | grep -i "PCSE"
+# Debe mostrar: PCSE00001 ✅
+```
+
+## 📞 Si el Error Persiste
+
+Copia y pega aquí:
+1. El error completo que te sale
+2. El resultado de: `cat Makefile_complete | grep "LIBS"`
+3. El resultado de: `git log --oneline -5`
