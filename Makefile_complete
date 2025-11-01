@@ -1,9 +1,9 @@
 TARGET = VitaCast
 OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o
 
-VITASDK ?= $(PWD)/.deps/vitasdk
+VITASDK ?= /usr/local/vitasdk
 VSDKLIB ?= $(VITASDK)/arm-vita-eabi/lib
-LIBS = -L$(VSDKLIB) -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCommonDialog_stub \
+LIBS = -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCommonDialog_stub \
   -lSceSysmodule_stub -lSceAppMgr_stub -lSceCtrl_stub -lSceNet_stub \
   -lSceNetCtl_stub -lSceIofilemgr_stub -lSceLibKernel_stub -lSceSsl_stub \
   -lcurl -lssl -lcrypto -lpng16 -lfreetype -lz -lm
