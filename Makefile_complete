@@ -1,9 +1,10 @@
 TARGET = VitaCast
-OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o
+OBJS = main.o ui/ui_manager.o audio/audio_player.o audio/atrac_decoder.o network/network_manager.o apple/apple_sync.o vita2d_stub.o
 
 VITASDK ?= /usr/local/vitasdk
 VSDKLIB ?= $(VITASDK)/arm-vita-eabi/lib
-LIBS = -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCommonDialog_stub \
+# Librer?as b?sicas necesarias - sin vita2d por ahora para evitar errores
+LIBS = -lSceGxm_stub -lSceDisplay_stub -lSceCommonDialog_stub \
   -lSceSysmodule_stub -lSceAppMgr_stub -lSceCtrl_stub -lSceNet_stub \
   -lSceNetCtl_stub -lSceIofilemgr_stub -lSceLibKernel_stub -lSceSsl_stub \
   -lcurl -lssl -lcrypto -lpng16 -lfreetype -lz -lm
@@ -64,6 +65,10 @@ network/network_manager.o: network/network_manager.c network/network_manager.h
 
 # Apple Sync
 apple/apple_sync.o: apple/apple_sync.c apple/apple_sync.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+# Vita2D Stub (para compilaci?n sin librer?a vita2d)
+vita2d_stub.o: vita2d_stub.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 # Clean target

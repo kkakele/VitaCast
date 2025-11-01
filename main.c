@@ -1,10 +1,10 @@
 #include <vitasdk.h>
-#include <vita2d.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <curl/curl.h>
+// #include <vita2d.h>  // Comentado temporalmente para compilaci?n b?sica
 #include "ui/ui_manager.h"
 #include "audio/audio_player.h"
 #include "network/network_manager.h"
