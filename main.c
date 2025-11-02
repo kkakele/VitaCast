@@ -1,136 +1,390 @@
-﻿#include <vitasdk.h>
-#include <vita2d.h>
+﻿#include <psp2/ctrl.h>
+#include <psp2/kernel/processmgr.h>
+#include <psp2/display.h>
+#include <psp2/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <curl/curl.h>
+#include <stdbool.h>
+
 #include "ui/ui_manager.h"
 #include "audio/audio_player.h"
+#include "audio/atrac_decoder.h"
 #include "network/network_manager.h"
 #include "apple/apple_sync.h"
 
 #define APP_TITLE "VitaCast"
-#define APP_VERSION "2.0.0"
+#define APP_VERSION "2.0.1"
+#define FRAME_DELAY 16666 // ~60 FPS en microsegundos
 
+// Estructura principal de la aplicación
 typedef struct {
+    // Managers y componentes
+    ui_manager_t* ui;
+    audio_player_t* audio;
+    network_manager_t* network;
+    apple_sync_t* apple;
+    
+    // Estado de la aplicación
     app_state_t current_state;
     bool running;
-    vita2d_texture *background_texture;
-    ui_manager_t *ui_manager;
-    audio_player_t *audio_player;
-    network_manager_t *network_manager;
-    apple_sync_t *apple_sync;
-} vita_cast_app_t;
+    
+    // Control de entrada
+    SceCtrlData pad;
+    SceCtrlData old_pad;
+    
+    // FPS y timing
+    int frame_counter;
+    bool demo_mode;
+} vitacast_app_t;
 
-static vita_cast_app_t *app = NULL;
+static vitacast_app_t* app = NULL;
 
-static int vita_cast_init() {
-    vita2d_init();
-    vita2d_set_clear_color(RGBA8(0x00, 0x00, 0x00, 0xFF));
-    curl_global_init(CURL_GLOBAL_DEFAULT);
+// ============================================================================
+// INICIALIZACIÓN Y LIMPIEZA
+// ============================================================================
+
+static int vitacast_init(void) {
+    // Inicializar control
+    sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG);
     
-    app = malloc(sizeof(vita_cast_app_t));
-    if (!app) return -1;
-    
-    memset(app, 0, sizeof(vita_cast_app_t));
-    app->running = true;
-    app->current_state = APP_STATE_MAIN_MENU;
-    
-    app->ui_manager = ui_manager_create();
-    app->audio_player = audio_player_create();
-    app->network_manager = network_manager_create();
-    app->apple_sync = apple_sync_create();
-    
-    if (!app->ui_manager || !app->audio_player || 
-        !app->network_manager || !app->apple_sync) {
+    // Crear estructura de la app
+    app = (vitacast_app_t*)malloc(sizeof(vitacast_app_t));
+    if (!app) {
+        printf("ERROR: No se pudo asignar memoria para la aplicación\n");
         return -1;
     }
     
-    network_manager_connect(app->network_manager);
-    app->background_texture = vita2d_load_PNG_file("app0:/assets/background.png");
+    memset(app, 0, sizeof(vitacast_app_t));
+    app->running = true;
+    app->current_state = APP_STATE_MAIN_MENU;
+    app->frame_counter = 0;
+    app->demo_mode = false;
+    
+    // Inicializar UI Manager
+    printf("Inicializando UI Manager...\n");
+    app->ui = ui_manager_create();
+    if (!app->ui) {
+        printf("ERROR: No se pudo inicializar UI Manager\n");
+        free(app);
+        return -1;
+    }
+    
+    // Inicializar Audio Player
+    printf("Inicializando Audio Player...\n");
+    app->audio = audio_player_create();
+    if (!app->audio) {
+        printf("ADVERTENCIA: Audio Player no disponible\n");
+    } else {
+        printf("Audio Player inicializado correctamente\n");
+        // Verificar soporte ATRAC
+        if (atrac_decoder_is_available()) {
+            printf("Soporte ATRAC3/ATRAC3plus disponible\n");
+        }
+    }
+    
+    // Inicializar Network Manager
+    printf("Inicializando Network Manager...\n");
+    app->network = network_manager_create();
+    if (!app->network) {
+        printf("ADVERTENCIA: Network Manager no disponible\n");
+    } else {
+        printf("Network Manager inicializado correctamente\n");
+    }
+    
+    // Inicializar Apple Sync
+    printf("Inicializando Apple Sync...\n");
+    app->apple = apple_sync_create();
+    if (!app->apple) {
+        printf("ADVERTENCIA: Apple Sync no disponible\n");
+    } else {
+        printf("Apple Sync inicializado correctamente\n");
+        // Simular inicio de sesión para demo
+        apple_sync_sign_in(app->apple, "demo@icloud.com");
+    }
+    
+    printf("\n");
+    printf("═══════════════════════════════════════════════════════════\n");
+    printf("  VitaCast v%s - Inicializado correctamente\n", APP_VERSION);
+    printf("═══════════════════════════════════════════════════════════\n");
+    printf("\n");
+    
+    // Simular reproducción de podcast para demo
+    if (app->audio) {
+        audio_player_play(app->audio, "ux0:/data/podcasts/tech_talk_ep142.mp3");
+    }
+    
+    sceKernelDelayThread(2000000); // Esperar 2 segundos para que se lea el mensaje
     
     return 0;
 }
 
-static void vita_cast_cleanup() {
-    if (app) {
-        if (app->background_texture) {
-            vita2d_free_texture(app->background_texture);
-        }
-        
-        if (app->ui_manager) ui_manager_destroy(app->ui_manager);
-        if (app->audio_player) audio_player_destroy(app->audio_player);
-        if (app->network_manager) network_manager_destroy(app->network_manager);
-        if (app->apple_sync) apple_sync_destroy(app->apple_sync);
-        
-        free(app);
+static void vitacast_cleanup(void) {
+    if (!app) return;
+    
+    printf("\nCerrando VitaCast...\n");
+    
+    if (app->ui) {
+        ui_manager_destroy(app->ui);
+        printf("UI Manager cerrado\n");
     }
     
-    curl_global_cleanup();
-    vita2d_fini();
+    if (app->audio) {
+        audio_player_destroy(app->audio);
+        printf("Audio Player cerrado\n");
+    }
+    
+    if (app->network) {
+        network_manager_destroy(app->network);
+        printf("Network Manager cerrado\n");
+    }
+    
+    if (app->apple) {
+        apple_sync_destroy(app->apple);
+        printf("Apple Sync cerrado\n");
+    }
+    
+    free(app);
+    app = NULL;
+    
+    printf("VitaCast cerrado correctamente\n");
+    sceKernelDelayThread(1000000); // Esperar 1 segundo
 }
 
-static void vita_cast_render() {
-    vita2d_start_drawing();
-    vita2d_clear_screen();
+// ============================================================================
+// MANEJO DE ENTRADA
+// ============================================================================
+
+static void vitacast_handle_input(void) {
+    if (!app || !app->ui) return;
     
-    if (app->background_texture) {
-        vita2d_draw_texture(app->background_texture, 0, 0);
-    } else {
-        vita2d_draw_rectangle(0, 0, 960, 544, RGBA8(0x1a, 0x1a, 0x1a, 0xFF));
+    sceCtrlPeekBufferPositive(0, &app->pad, 1);
+    
+    // Botón START para salir
+    if ((app->pad.buttons & SCE_CTRL_START) && !(app->old_pad.buttons & SCE_CTRL_START)) {
+        app->running = false;
     }
     
+    // Botón SELECT para toggle demo mode
+    if ((app->pad.buttons & SCE_CTRL_SELECT) && !(app->old_pad.buttons & SCE_CTRL_SELECT)) {
+        app->demo_mode = !app->demo_mode;
+        if (app->demo_mode) {
+            printf("\n[DEMO MODE ACTIVADO - Navegación automática]\n");
+        } else {
+            printf("\n[DEMO MODE DESACTIVADO]\n");
+        }
+    }
+    
+    // Control de volumen con L/R
+    if (app->audio) {
+        if (app->pad.buttons & SCE_CTRL_LTRIGGER) {
+            int vol = audio_player_get_volume(app->audio);
+            audio_player_set_volume(app->audio, vol - 1);
+        }
+        if (app->pad.buttons & SCE_CTRL_RTRIGGER) {
+            int vol = audio_player_get_volume(app->audio);
+            audio_player_set_volume(app->audio, vol + 1);
+        }
+    }
+    
+    app->old_pad = app->pad;
+}
+
+// ============================================================================
+// ACTUALIZACIÓN
+// ============================================================================
+
+static void vitacast_update(void) {
+    if (!app) return;
+    
+    // Actualizar entrada
+    vitacast_handle_input();
+    
+    // Actualizar UI
+    if (app->ui) {
+        ui_manager_update(app->ui);
+        app->current_state = ui_manager_get_requested_state(app->ui);
+    }
+    
+    // Actualizar Audio
+    if (app->audio) {
+        audio_player_update(app->audio);
+    }
+    
+    // Actualizar Network
+    if (app->network) {
+        network_manager_update(app->network);
+    }
+    
+    // Actualizar Apple Sync
+    if (app->apple) {
+        apple_sync_update(app->apple);
+    }
+    
+    app->frame_counter++;
+    
+    // Demo mode: cambiar estado automáticamente cada 5 segundos
+    if (app->demo_mode && (app->frame_counter % 300 == 0)) {
+        app->current_state = (app->current_state + 1) % 7;
+    }
+}
+
+// ============================================================================
+// RENDERIZADO
+// ============================================================================
+
+static void vitacast_clear_screen(void) {
+    printf("\033[2J\033[H"); // ANSI escape codes para limpiar pantalla
+}
+
+static void vitacast_render_status_bar(void) {
+    printf("─────────────────────────────────────────────────────────────\n");
+    
+    // Estado de red
+    if (app->network) {
+        if (network_manager_is_connected(app->network)) {
+            printf("📡 WiFi: Connected");
+        } else {
+            printf("📡 WiFi: Disconnected");
+        }
+    }
+    
+    printf("  |  ");
+    
+    // Estado de Apple
+    if (app->apple) {
+        if (apple_sync_is_signed_in(app->apple)) {
+            printf("🍎 Apple: %s", apple_sync_get_user_email(app->apple));
+        } else {
+            printf("🍎 Apple: Not signed in");
+        }
+    }
+    
+    printf("  |  ");
+    
+    // Estado de audio
+    if (app->audio) {
+        audio_state_t state = audio_player_get_state(app->audio);
+        if (state == AUDIO_STATE_PLAYING) {
+            printf("▶️  Playing");
+        } else if (state == AUDIO_STATE_PAUSED) {
+            printf("⏸️  Paused");
+        } else {
+            printf("⏹️  Stopped");
+        }
+        printf(" | Vol: %d%%", audio_player_get_volume(app->audio));
+    }
+    
+    printf("\n─────────────────────────────────────────────────────────────\n");
+}
+
+static void vitacast_render(void) {
+    if (!app || !app->ui) return;
+    
+    // Limpiar pantalla
+    vitacast_clear_screen();
+    
+    // Título
+    printf("\n");
+    printf("╔═════════════════════════════════════════════════════════════╗\n");
+    printf("║         VitaCast v%s - Podcast & Music Player          ║\n", APP_VERSION);
+    printf("╚═════════════════════════════════════════════════════════════╝\n");
+    
+    // Barra de estado
+    vitacast_render_status_bar();
+    
+    // Renderizar pantalla según estado actual
     switch (app->current_state) {
         case APP_STATE_MAIN_MENU:
-            ui_manager_render_main_menu(app->ui_manager);
+            ui_manager_render_main_menu(app->ui);
             break;
+            
         case APP_STATE_PODCASTS:
-            ui_manager_render_podcasts(app->ui_manager);
+            ui_manager_render_podcasts(app->ui);
             break;
+            
         case APP_STATE_MUSIC:
-            ui_manager_render_music(app->ui_manager);
+            ui_manager_render_music(app->ui);
             break;
+            
         case APP_STATE_PLAYER:
-            ui_manager_render_player(app->ui_manager);
+            ui_manager_render_player(app->ui);
             break;
+            
         case APP_STATE_SETTINGS:
-            ui_manager_render_settings(app->ui_manager);
+            ui_manager_render_settings(app->ui);
             break;
+            
         case APP_STATE_SEARCH:
-            ui_manager_render_search(app->ui_manager);
+            ui_manager_render_search(app->ui);
             break;
+            
         case APP_STATE_DOWNLOADS:
-            ui_manager_render_downloads(app->ui_manager);
+            ui_manager_render_downloads(app->ui);
+            break;
+            
+        default:
+            printf("Estado desconocido\n");
             break;
     }
     
-    vita2d_end_drawing();
-    vita2d_swap_buffers();
-}
-
-static void vita_cast_update() {
-    ui_manager_update(app->ui_manager);
-    audio_player_update(app->audio_player);
-    network_manager_update(app->network_manager);
-    apple_sync_update(app->apple_sync);
+    // Controles generales
+    printf("\n");
+    printf("─────────────────────────────────────────────────────────────\n");
+    printf("  L/R: Volume  |  SELECT: Demo Mode  |  START: Exit\n");
+    printf("─────────────────────────────────────────────────────────────\n");
     
-    app_state_t new_state = ui_manager_get_requested_state(app->ui_manager);
-    if (new_state != app->current_state) {
-        app->current_state = new_state;
+    if (app->demo_mode) {
+        printf("  [DEMO MODE] - Navegación automática activa\n");
     }
+    
+    printf("\n  Frame: %d\n", app->frame_counter);
 }
 
-int main() {
-    if (vita_cast_init() < 0) {
+// ============================================================================
+// MAIN LOOP
+// ============================================================================
+
+int main(int argc, char *argv[]) {
+    (void)argc;
+    (void)argv;
+    
+    // Inicializar aplicación
+    if (vitacast_init() < 0) {
+        printf("\nERROR CRÍTICO: No se pudo inicializar VitaCast\n");
+        printf("Presiona START para salir\n");
+        
+        SceCtrlData pad;
+        while (1) {
+            sceCtrlPeekBufferPositive(0, &pad, 1);
+            if (pad.buttons & SCE_CTRL_START) break;
+            sceKernelDelayThread(100000);
+        }
+        
+        sceKernelExitProcess(-1);
         return -1;
     }
     
-    while (app->running) {
-        vita_cast_update();
-        vita_cast_render();
-        vita2d_wait_rendering_done();
+    // Loop principal
+    while (app && app->running) {
+        // Actualizar
+        vitacast_update();
+        
+        // Renderizar
+        vitacast_render();
+        
+        // Delay para mantener ~60 FPS
+        sceKernelDelayThread(FRAME_DELAY);
     }
     
-    vita_cast_cleanup();
+    // Cleanup
+    vitacast_cleanup();
+    
+    // Salir correctamente
+    printf("\n¡Gracias por usar VitaCast!\n");
+    printf("Saliendo...\n");
+    sceKernelDelayThread(1000000);
+    
+    sceKernelExitProcess(0);
     return 0;
 }

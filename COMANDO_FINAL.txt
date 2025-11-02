@@ -1,0 +1,27 @@
+════════════════════════════════════════════════════════════════
+ABRE POWERSHELL COMO ADMINISTRADOR Y EJECUTA ESTOS COMANDOS
+════════════════════════════════════════════════════════════════
+
+1. git add main_complete.c Makefile_final
+
+2. git commit -m "Fix: Version completa sin dependencia de vita2d"
+
+3. git push origin main
+
+4. git tag -d v1.0.1
+
+5. git push origin --delete v1.0.1
+
+6. git tag v1.0.1 -m "Release v1.0.1"
+
+7. git push origin v1.0.1 --force
+
+════════════════════════════════════════════════════════════════
+
+DESPUES:
+- Ve a https://github.com/kkakele/VitaCast/actions
+- Espera 15-20 minutos a que compile (sin dependencias de vita2d es más rápido)
+- Ve a https://github.com/kkakele/VitaCast/releases
+- Descarga VitaCast-v1.0.1.vpk
+
+════════════════════════════════════════════════════════════════

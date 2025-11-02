@@ -3,24 +3,12 @@ TARGET = VitaCast
 # o main_final.o para version mas simple
 OBJS = main_complete.o
 
-# Bibliotecas necesarias para vita2d y funcionalidades de red
-LIBS = -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCtrl_stub \
-       -lSceLibKernel_stub -lScePgf_stub -lpng -ljpeg -lz -lm \
-       -lfreetype -lcurl -lssl -lcrypto -lSceNet_stub -lSceNetCtl_stub \
-       -lSceHttp_stub -lSceSsl_stub -lSceAppUtil_stub
+# Bibliotecas básicas de VitaSDK (sin vita2d)
+LIBS = -lSceDisplay_stub -lSceCtrl_stub -lSceLibKernel_stub
 
 PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
 CFLAGS = -Wl,-q -Wall -O3 -std=c99
-
-# Agregar includes de vita2d y otras librerías
-ifdef VITASDK
-  CFLAGS += -I$(VITASDK)/arm-vita-eabi/include
-  CFLAGS += -I$(VITASDK)/arm-vita-eabi/include/vita2d
-  LDFLAGS = -L$(VITASDK)/arm-vita-eabi/lib
-else
-  $(warning VITASDK no está configurado, usando rutas por defecto)
-endif
 
 # VPK metadata (TITLE_ID debe tener exactamente 9 caracteres)
 TITLE_ID = VCAST2000
@@ -45,7 +33,7 @@ $(TARGET).vpk: eboot.bin
 
 eboot.bin: $(OBJS)
 	@echo "Enlazando eboot.bin..."
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ $(LIBS) -o $@
+	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 
 %.o: %.c
 	@echo "Compilando $<..."
