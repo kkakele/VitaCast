@@ -89,9 +89,9 @@ void ui_manager_render_main_menu(ui_manager_t* manager) {
     ui_manager_t_impl* m = (ui_manager_t_impl*)manager;
     if (!m || !m->font) return;
     
-    const float start_y = 100.0f;
-    const float line_height = 50.0f;
-    const float start_x = 100.0f;
+    const int start_y = 100;
+    const int line_height = 50;
+    const int start_x = 100;
     const unsigned int color_normal = RGBA8(255, 255, 255, 255);
     const unsigned int color_selected = RGBA8(0, 162, 232, 255);
     
@@ -110,11 +110,12 @@ void ui_manager_render_main_menu(ui_manager_t* manager) {
     };
     
     for (int i = 0; i < 7; i++) {
-        float y = start_y + (i * line_height);
+        int y = start_y + (i * line_height);
         unsigned int color = (m->selected_item == i) ? color_selected : color_normal;
         const char* marker = (m->selected_item == i) ? "► " : "  ";
-        
-        vita2d_pgf_draw_text(m->font, start_x, y, color, 0.8f, "%s%s", marker, menu_items[i]);
+        char buffer[128];
+        snprintf(buffer, sizeof(buffer), "%s%s", marker, menu_items[i]);
+        vita2d_pgf_draw_text(m->font, start_x, y, color, 0.8f, buffer);
     }
     
     // Controles
@@ -132,19 +133,19 @@ void ui_manager_render_podcasts(ui_manager_t* manager) {
     
     vita2d_pgf_draw_text(m->font, 100, 60, color_title, 1.0f, "Podcasts - Subscribed Shows");
     
-    float y = 120.0f;
+    int y = 120;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.8f, "Tech Talk Weekly");
-    y += 30.0f;
+    y += 30;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Episode 142 - AI Revolution (45:23)");
     
-    y += 60.0f;
+    y += 60;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.8f, "The Daily");
-    y += 30.0f;
+    y += 30;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Today's Top Stories (23:15)");
     
-    y += 60.0f;
+    y += 60;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.8f, "Business Insights");
-    y += 30.0f;
+    y += 30;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Market Analysis Q4 (38:42)");
     
     vita2d_pgf_draw_text(m->font, 100, 500, color_subtext, 0.6f, "X: Play  O: Back");
@@ -160,20 +161,20 @@ void ui_manager_render_music(ui_manager_t* manager) {
     
     vita2d_pgf_draw_text(m->font, 100, 60, color_title, 1.0f, "Apple Music - Your Library");
     
-    float y = 120.0f;
+    int y = 120.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Recently Played:");
-    y += 40.0f;
+    y += 40.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• Summer Vibes Playlist (24 songs)");
-    y += 35.0f;
+    y += 35.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• Chill Lo-Fi Beats (18 songs)");
-    y += 35.0f;
+    y += 35.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• Rock Classics (42 songs)");
     
-    y += 50.0f;
+    y += 50.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Albums:");
-    y += 40.0f;
+    y += 40.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• Random Access Memories - Daft Punk");
-    y += 35.0f;
+    y += 35.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• Thriller - Michael Jackson");
     
     vita2d_pgf_draw_text(m->font, 100, 500, color_subtext, 0.6f, "X: Play  O: Back");
@@ -189,16 +190,16 @@ void ui_manager_render_player(ui_manager_t* manager) {
     
     vita2d_pgf_draw_text(m->font, 100, 60, color_title, 1.0f, "Now Playing");
     
-    float y = 150.0f;
+    int y = 150.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 1.0f, "Tech Talk Weekly");
-    y += 40.0f;
+    y += 40.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.8f, "Episode 142 - AI Revolution");
-    y += 50.0f;
+    y += 50.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_subtext, 0.7f, "Playing...");
     
-    y += 80.0f;
+    y += 80.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Progress: 12:34 / 45:23");
-    y += 40.0f;
+    y += 40.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Volume: 80%%");
     
     vita2d_pgf_draw_text(m->font, 100, 500, color_subtext, 0.6f, "Triangle: Prev  X: Pause  Square: Next  O: Back");
@@ -214,28 +215,28 @@ void ui_manager_render_settings(ui_manager_t* manager) {
     
     vita2d_pgf_draw_text(m->font, 100, 60, color_title, 1.0f, "Settings");
     
-    float y = 120.0f;
+    int y = 120.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Audio:");
-    y += 35.0f;
+    y += 35.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Volume: 80%%");
-    y += 30.0f;
+    y += 30.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Quality: High (320kbps)");
     
-    y += 50.0f;
+    y += 50.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Network:");
-    y += 35.0f;
+    y += 35.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "WiFi: Connected");
-    y += 30.0f;
+    y += 30.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Auto-Download: Enabled");
     
-    y += 50.0f;
+    y += 50.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Apple Account:");
-    y += 35.0f;
+    y += 35.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Status: Signed In");
     
-    y += 50.0f;
+    y += 50.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Storage:");
-    y += 35.0f;
+    y += 35.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Cache: 245 MB / 1 GB");
     
     vita2d_pgf_draw_text(m->font, 100, 500, color_subtext, 0.6f, "X: Modify  O: Back");
@@ -251,23 +252,23 @@ void ui_manager_render_search(ui_manager_t* manager) {
     
     vita2d_pgf_draw_text(m->font, 100, 60, color_title, 1.0f, "Search Podcasts");
     
-    float y = 120.0f;
+    int y = 120.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Search: tech");
     
-    y += 60.0f;
+    y += 60.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Results:");
-    y += 40.0f;
+    y += 40.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.8f, "Tech Talk Weekly");
-    y += 30.0f;
+    y += 30.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Technology news and analysis");
-    y += 25.0f;
+    y += 25.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.5f, "Rating: 4.8 - 142 episodes");
     
-    y += 50.0f;
+    y += 50.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.8f, "TechCrunch");
-    y += 30.0f;
+    y += 30.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Startup and technology news");
-    y += 25.0f;
+    y += 25.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.5f, "Rating: 4.5 - 89 episodes");
     
     vita2d_pgf_draw_text(m->font, 100, 500, color_subtext, 0.6f, "X: Subscribe  O: Back");
@@ -283,23 +284,23 @@ void ui_manager_render_downloads(ui_manager_t* manager) {
     
     vita2d_pgf_draw_text(m->font, 100, 60, color_title, 1.0f, "Downloads");
     
-    float y = 120.0f;
+    int y = 120.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Queue:");
-    y += 40.0f;
+    y += 40.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "75%% - Tech Talk Ep. 143");
-    y += 35.0f;
+    y += 35.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "25%% - The Daily - Today");
     
-    y += 60.0f;
+    y += 60.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Completed:");
-    y += 40.0f;
+    y += 40.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• Tech Talk Weekly Ep. 142 (45 MB)");
-    y += 35.0f;
+    y += 35.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• Business Insights Q4 (38 MB)");
-    y += 35.0f;
+    y += 35.0;
     vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• The Daily Yesterday (23 MB)");
     
-    y += 50.0f;
+    y += 50.0;
     vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Total: 245 MB");
     
     vita2d_pgf_draw_text(m->font, 100, 500, color_subtext, 0.6f, "X: Manage  O: Back");

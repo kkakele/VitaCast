@@ -247,46 +247,7 @@ static void vitacast_clear_screen(void) {
     vita2d_clear_screen();
 }
 
-static void vitacast_render_status_bar(void) {
-    printf("─────────────────────────────────────────────────────────────\n");
-    
-    // Estado de red
-    if (app->network) {
-        if (network_manager_is_connected(app->network)) {
-            printf("📡 WiFi: Connected");
-        } else {
-            printf("📡 WiFi: Disconnected");
-        }
-    }
-    
-    printf("  |  ");
-    
-    // Estado de Apple
-    if (app->apple) {
-        if (apple_sync_is_signed_in(app->apple)) {
-            printf("🍎 Apple: %s", apple_sync_get_user_email(app->apple));
-        } else {
-            printf("🍎 Apple: Not signed in");
-        }
-    }
-    
-    printf("  |  ");
-    
-    // Estado de audio
-    if (app->audio) {
-        audio_state_t state = audio_player_get_state(app->audio);
-        if (state == AUDIO_STATE_PLAYING) {
-            printf("▶️  Playing");
-        } else if (state == AUDIO_STATE_PAUSED) {
-            printf("⏸️  Paused");
-        } else {
-            printf("⏹️  Stopped");
-        }
-        printf(" | Vol: %d%%", audio_player_get_volume(app->audio));
-    }
-    
-    printf("\n─────────────────────────────────────────────────────────────\n");
-}
+// Función eliminada - ahora se renderiza gráficamente en la UI
 
 static void vitacast_render(void) {
     if (!app || !app->ui) return;
