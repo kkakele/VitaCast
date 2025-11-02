@@ -20,32 +20,65 @@ jobs:
       uses: actions/checkout@v3
     
     - name: Setup VitaSDK
-      uses: vitasdk/setup-vitasdk@v1
-      with:
-        version: 'latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y make git cmake python3 wget curl build-essential
+        
+        export VITASDK=/usr/local/vitasdk
+        export PATH=$VITASDK/bin:$PATH
+        
+        # Crear directorio VitaSDK
+        sudo mkdir -p $VITASDK
+        sudo chown -R $USER:$USER $VITASDK
+        
+        # Clonar vdpm
+        cd $HOME
+        git clone https://github.com/vitasdk/vdpm
+        cd vdpm
+        
+        # Instalar VitaSDK
+        ./bootstrap-vitasdk.sh
+        
+        # Instalar paquetes necesarios
+        ./vdpm vita2d
+        
+        # Configurar variables de entorno para siguientes pasos
+        echo "VITASDK=$VITASDK" >> $GITHUB_ENV
+        echo "$VITASDK/bin" >> $GITHUB_PATH
     
     - name: Install dependencies
+      env:
+        VITASDK: /usr/local/vitasdk
       run: |
-        vdpm vita2d
+        export PATH=$VITASDK/bin:$PATH
+        cd $HOME/vdpm
+        ./vdpm vita2d curl
     
     - name: Build VitaCast
+      env:
+        VITASDK: /usr/local/vitasdk
       run: |
+        export PATH=$VITASDK/bin:$PATH
+        export VITASDK=/usr/local/vitasdk
+        
         make -f Makefile_final clean || true
         make -f Makefile_final release
     
     - name: Generate checksums
       run: |
-        md5sum VitaCast.vpk > VitaCast-v${GITHUB_REF#refs/tags/v}.md5
-        sha256sum VitaCast.vpk > VitaCast-v${GITHUB_REF#refs/tags/v}.sha256
+        VERSION=${GITHUB_REF#refs/tags/v}
+        md5sum VitaCast.vpk > VitaCast-v${VERSION}.md5
+        sha256sum VitaCast.vpk > VitaCast-v${VERSION}.sha256
     
     - name: Rename VPK
       run: |
-        mv VitaCast.vpk VitaCast-v${GITHUB_REF#refs/tags/v}.vpk
+        VERSION=${GITHUB_REF#refs/tags/v}
+        mv VitaCast.vpk VitaCast-v${VERSION}.vpk
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ github.ref }}
+        tag_name: ${{ github.ref_name }}
         name: VitaCast ${{ github.ref_name }} - Release
         body: |
           # VitaCast ${{ github.ref_name }} - Release Compilado
@@ -67,4 +100,5 @@ jobs:
           RELEASE_NOTES.md
         draft: false
         prerelease: false
-
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
