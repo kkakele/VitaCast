@@ -1,0 +1,76 @@
+═══════════════════════════════════════════════════════════
+  INSTRUCCIONES PARA SUBIR RELEASE COMPLETO
+═══════════════════════════════════════════════════════════
+
+PASO 1: BORRAR RELEASES ANTERIORES
+-----------------------------------
+Ejecuta estos comandos uno por uno en PowerShell:
+
+gh release list
+gh release delete v2.0.1 --yes
+gh release delete v1.0.0 --yes
+git push origin --delete v2.0.1
+git push origin --delete v1.0.0
+git tag -d v2.0.1
+git tag -d v1.0.0
+
+
+PASO 2: CREAR NUEVO TAG Y ACTIVAR COMPILACION
+----------------------------------------------
+Ejecuta:
+
+git add .
+git commit -m "Release v1.0.0 - Version completa"
+git push origin main
+git tag v1.0.0 -m "Release v1.0.0"
+git push origin v1.0.0
+
+
+PASO 3: VERIFICAR PROGRESO
+---------------------------
+Abre en el navegador:
+https://github.com/kkakele/VitaCast/actions
+
+Espera 15-20 minutos mientras GitHub Actions:
+- Instala VitaSDK
+- Compila main_complete.c
+- Crea VitaCast.vpk
+- Genera checksums
+- Crea release automaticamente
+
+
+PASO 4: VERIFICAR RELEASE
+--------------------------
+Cuando termine, ve a:
+https://github.com/kkakele/VitaCast/releases
+
+Deberias ver VitaCast v1.0.0 con el .vpk listo para descargar.
+
+
+═══════════════════════════════════════════════════════════
+ALTERNATIVA: Si GitHub Actions falla
+═══════════════════════════════════════════════════════════
+
+Puedes compilar localmente en WSL2:
+
+1. Instalar WSL2:
+   wsl --install
+
+2. Reiniciar PC
+
+3. En WSL, instalar VitaSDK:
+   git clone https://github.com/vitasdk/vdpm
+   cd vdpm
+   sudo ./bootstrap-vitasdk.sh
+   
+4. Compilar:
+   cd /mnt/c/Users/kkake/VITACAST/VitaCast
+   export VITASDK=/usr/local/vitasdk
+   export PATH=$VITASDK/bin:$PATH
+   make -f Makefile_final release
+
+5. Subir el VPK a releases manualmente desde GitHub web
+
+
+═══════════════════════════════════════════════════════════
+
