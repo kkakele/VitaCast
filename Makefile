@@ -58,6 +58,8 @@ LIBS = -lSceDisplay_stub \
        -lSceSysmodule_stub \
        -lSceCommonDialog_stub \
        -lSceGxm_stub \
+       -lSceGpuEs4_stub \
+       -lSceShaccCgExt \
        -lSceAppMgr_stub \
        -lvita2d \
        -lm
