@@ -10,17 +10,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Set up VitaSDK
-        uses: vitasdk/setup-vitasdk@master
+        run: |
+          export VITASDK=/usr/local/vitasdk
+          sudo mkdir -p $VITASDK
+          sudo chown $USER:$USER $VITASDK
+          git clone https://github.com/vitasdk/buildscripts.git /tmp/vitasdk-buildscripts
+          cd /tmp/vitasdk-buildscripts
+          export VITASDK=$VITASDK
+          ./build.sh
+          echo "VITASDK=$VITASDK" >> $GITHUB_ENV
+          echo "$VITASDK/bin" >> $GITHUB_PATH
         
       - name: Build VitaCast
+        env:
+          VITASDK: /usr/local/vitasdk
         run: |
+          export PATH=$VITASDK/bin:$PATH
           make release
           
       - name: Upload VPK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: VitaCast.vpk
           path: VitaCast.vpk
