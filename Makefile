@@ -57,9 +57,11 @@ LIBS = -lSceDisplay_stub \
        -lSceNetCtl_stub \
        -lSceSysmodule_stub \
        -lSceCommonDialog_stub \
-       -lvita2d \
+       -lSceFont_stub \
        -lSceGxm_stub \
-       -lSceAppMgr_stub
+       -lSceAppMgr_stub \
+       -lvita2d \
+       -lm
 
 # Targets principales
 .PHONY: all clean release debug install
