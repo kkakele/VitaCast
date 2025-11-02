@@ -21,39 +21,55 @@ jobs:
     
     - name: Setup VitaSDK
       run: |
+        set -e
+        
         sudo apt-get update
         sudo apt-get install -y make git cmake python3 wget curl build-essential
         
         export VITASDK=/usr/local/vitasdk
-        export PATH=$VITASDK/bin:$PATH
         
-        # Eliminar directorio si existe (de ejecuciones anteriores)
+        # IMPORTANTE: Eliminar directorio ANTES de crear nuevo
+        echo "Verificando directorio VitaSDK existente..."
         if [ -d "$VITASDK" ]; then
           echo "Eliminando directorio VitaSDK existente..."
           sudo rm -rf $VITASDK
+          echo "Directorio eliminado exitosamente"
+        else
+          echo "No existe directorio previo, continuando..."
         fi
         
-        # Crear directorio VitaSDK
+        # También limpiar vdpm si existe
+        if [ -d "$HOME/vdpm" ]; then
+          echo "Eliminando vdpm existente..."
+          rm -rf $HOME/vdpm
+        fi
+        
+        # Crear directorio VitaSDK desde cero
+        echo "Creando directorio VitaSDK..."
         sudo mkdir -p $VITASDK
         sudo chown -R $USER:$USER $VITASDK
         
         # Clonar vdpm
+        echo "Clonando vdpm..."
         cd $HOME
-        if [ -d "vdpm" ]; then
-          rm -rf vdpm
-        fi
         git clone https://github.com/vitasdk/vdpm
         cd vdpm
         
         # Instalar VitaSDK
+        echo "Instalando VitaSDK (esto puede tomar varios minutos)..."
         ./bootstrap-vitasdk.sh
         
         # Instalar paquetes necesarios
+        echo "Instalando paquetes adicionales..."
         ./vdpm vita2d
         
         # Configurar variables de entorno para siguientes pasos
         echo "VITASDK=$VITASDK" >> $GITHUB_ENV
         echo "$VITASDK/bin" >> $GITHUB_PATH
+        
+        # Verificar instalación
+        export PATH=$VITASDK/bin:$PATH
+        arm-vita-eabi-gcc --version || echo "Advertencia: gcc no encontrado"
     
     - name: Install additional dependencies
       env:
