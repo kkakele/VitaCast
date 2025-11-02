@@ -21,16 +21,12 @@ jobs:
         run: |
           export VITASDK=$HOME/vitasdk
           mkdir -p $VITASDK
-          # Intentar descargar tarball precompilado
-          if curl -sSL https://github.com/vitasdk/autobuilds/releases/download/master-linux-v2312/vitasdk-x86_64-linux-gnu-2312.tar.bz2 -o /tmp/vitasdk.tar.bz2; then
-            tar xjf /tmp/vitasdk.tar.bz2 -C $VITASDK --strip-components=1
-          else
-            # Fallback: usar buildscripts
-            git clone --depth 1 https://github.com/vitasdk/buildscripts.git /tmp/vitasdk-buildscripts
-            cd /tmp/vitasdk-buildscripts
-            export VITASDK=$VITASDK
-            ./setup.sh
-          fi
+          # Usar el script oficial de instalaci?n de VitaSDK
+          git clone https://github.com/vitasdk/buildscripts.git /tmp/vitasdk-buildscripts
+          cd /tmp/vitasdk-buildscripts
+          export VITASDK=$VITASDK
+          # El script build.sh es el correcto
+          bash build.sh
           echo "VITASDK=$VITASDK" >> $GITHUB_ENV
           echo "$VITASDK/bin" >> $GITHUB_PATH
         
