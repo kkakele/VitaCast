@@ -48,8 +48,12 @@ SOURCES = main.c \
 # Archivos objeto
 OBJECTS = $(SOURCES:%.c=$(BUILD_DIR)/%.o)
 
-# Bibliotecas del sistema
-LIBS = -lSceDisplay_stub \
+# Bibliotecas del sistema (orden importante para el linker)
+LIBS = -lvita2d \
+       -lSceGxm_stub \
+       -lSceGpuEs4_stub \
+       -lSceShaccCgExt \
+       -lSceDisplay_stub \
        -lSceCtrl_stub \
        -lSceLibKernel_stub \
        -lSceAudio_stub \
@@ -57,11 +61,7 @@ LIBS = -lSceDisplay_stub \
        -lSceNetCtl_stub \
        -lSceSysmodule_stub \
        -lSceCommonDialog_stub \
-       -lSceGxm_stub \
-       -lSceGpuEs4_stub \
-       -lSceShaccCgExt \
        -lSceAppMgr_stub \
-       -lvita2d \
        -lm
 
 # Targets principales
