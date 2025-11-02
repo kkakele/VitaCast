@@ -27,12 +27,21 @@ jobs:
         export VITASDK=/usr/local/vitasdk
         export PATH=$VITASDK/bin:$PATH
         
+        # Eliminar directorio si existe (de ejecuciones anteriores)
+        if [ -d "$VITASDK" ]; then
+          echo "Eliminando directorio VitaSDK existente..."
+          sudo rm -rf $VITASDK
+        fi
+        
         # Crear directorio VitaSDK
         sudo mkdir -p $VITASDK
         sudo chown -R $USER:$USER $VITASDK
         
         # Clonar vdpm
         cd $HOME
+        if [ -d "vdpm" ]; then
+          rm -rf vdpm
+        fi
         git clone https://github.com/vitasdk/vdpm
         cd vdpm
         
@@ -46,11 +55,12 @@ jobs:
         echo "VITASDK=$VITASDK" >> $GITHUB_ENV
         echo "$VITASDK/bin" >> $GITHUB_PATH
     
-    - name: Install dependencies
+    - name: Install additional dependencies
       env:
         VITASDK: /usr/local/vitasdk
       run: |
         export PATH=$VITASDK/bin:$PATH
+        export VITASDK=/usr/local/vitasdk
         cd $HOME/vdpm
         ./vdpm vita2d curl
     
