@@ -1,4 +1,4 @@
-﻿#include <psp2/ctrl.h>
+#include <psp2/ctrl.h>
 #include <psp2/kernel/processmgr.h>
 #include <psp2/display.h>
 #include <psp2/types.h>
@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <vita2d.h>
 
 #include "ui/ui_manager.h"
 #include "audio/audio_player.h"
@@ -14,7 +15,7 @@
 #include "apple/apple_sync.h"
 
 #define APP_TITLE "VitaCast"
-#define APP_VERSION "2.0.1"
+#define APP_VERSION "3.0.0"
 #define FRAME_DELAY 16666 // ~60 FPS en microsegundos
 
 // Estructura principal de la aplicación
@@ -45,6 +46,10 @@ static vitacast_app_t* app = NULL;
 // ============================================================================
 
 static int vitacast_init(void) {
+    // Inicializar vita2d
+    vita2d_init();
+    vita2d_set_clear_color(RGBA8(26, 26, 46, 255)); // Fondo oscuro estilo PS Vita
+    
     // Inicializar control
     sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG);
     
@@ -52,6 +57,7 @@ static int vitacast_init(void) {
     app = (vitacast_app_t*)malloc(sizeof(vitacast_app_t));
     if (!app) {
         printf("ERROR: No se pudo asignar memoria para la aplicación\n");
+        vita2d_fini();
         return -1;
     }
     
@@ -147,6 +153,9 @@ static void vitacast_cleanup(void) {
     free(app);
     app = NULL;
     
+    // Finalizar vita2d
+    vita2d_fini();
+    
     printf("VitaCast cerrado correctamente\n");
     sceKernelDelayThread(1000000); // Esperar 1 segundo
 }
@@ -234,7 +243,8 @@ static void vitacast_update(void) {
 // ============================================================================
 
 static void vitacast_clear_screen(void) {
-    printf("\033[2J\033[H"); // ANSI escape codes para limpiar pantalla
+    vita2d_start_drawing();
+    vita2d_clear_screen();
 }
 
 static void vitacast_render_status_bar(void) {
@@ -281,19 +291,10 @@ static void vitacast_render_status_bar(void) {
 static void vitacast_render(void) {
     if (!app || !app->ui) return;
     
-    // Limpiar pantalla
+    // Limpiar pantalla y comenzar frame
     vitacast_clear_screen();
     
-    // Título
-    printf("\n");
-    printf("╔═════════════════════════════════════════════════════════════╗\n");
-    printf("║         VitaCast v%s - Podcast & Music Player          ║\n", APP_VERSION);
-    printf("╚═════════════════════════════════════════════════════════════╝\n");
-    
-    // Barra de estado
-    vitacast_render_status_bar();
-    
-    // Renderizar pantalla según estado actual
+    // Renderizar UI según estado actual
     switch (app->current_state) {
         case APP_STATE_MAIN_MENU:
             ui_manager_render_main_menu(app->ui);
@@ -324,21 +325,12 @@ static void vitacast_render(void) {
             break;
             
         default:
-            printf("Estado desconocido\n");
             break;
     }
     
-    // Controles generales
-    printf("\n");
-    printf("─────────────────────────────────────────────────────────────\n");
-    printf("  L/R: Volume  |  SELECT: Demo Mode  |  START: Exit\n");
-    printf("─────────────────────────────────────────────────────────────\n");
-    
-    if (app->demo_mode) {
-        printf("  [DEMO MODE] - Navegación automática activa\n");
-    }
-    
-    printf("\n  Frame: %d\n", app->frame_counter);
+    // Finalizar frame y mostrar
+    vita2d_end_drawing();
+    vita2d_swap_buffers();
 }
 
 // ============================================================================

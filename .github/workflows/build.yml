@@ -15,6 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Install vita2d
+        run: |
+          export PATH=$VITASDK/bin:$PATH
+          $VITASDK/bin/vdpm vita2d || echo "vita2d puede estar ya instalado"
+          
       - name: Build VitaCast
         run: |
           export PATH=$VITASDK/bin:$PATH

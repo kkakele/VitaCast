@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <vita2d.h>
+#include <psp2/kernel/threadmgr.h>
 
 typedef struct ui_manager_t {
     app_state_t requested_state;
@@ -11,6 +13,7 @@ typedef struct ui_manager_t {
     int frame_counter;
     int selected_item;
     SceCtrlData old_pad;
+    vita2d_pgf* font;
 } ui_manager_t_impl;
 
 ui_manager_t* ui_manager_create(void) {
@@ -23,13 +26,21 @@ ui_manager_t* ui_manager_create(void) {
     m->frame_counter = 0;
     m->selected_item = 0;
     
+    // Cargar fuente del sistema
+    m->font = vita2d_load_default_pgf();
+    
     return (ui_manager_t*)m;
 }
 
 void ui_manager_destroy(ui_manager_t* manager) {
-    if (manager) {
-        free(manager);
+    if (!manager) return;
+    
+    ui_manager_t_impl* m = (ui_manager_t_impl*)manager;
+    if (m->font) {
+        vita2d_free_pgf(m->font);
     }
+    
+    free(manager);
 }
 
 void ui_manager_update(ui_manager_t* manager) {
@@ -74,134 +85,224 @@ void ui_manager_update(ui_manager_t* manager) {
     m->frame_counter++;
 }
 
-static void print_header(const char* title) {
-    printf("\n");
-    printf("╔══════════════════════════════════════════════════════════════╗\n");
-    printf("║  %s\n", title);
-    printf("╚══════════════════════════════════════════════════════════════╝\n");
-}
-
 void ui_manager_render_main_menu(ui_manager_t* manager) {
     ui_manager_t_impl* m = (ui_manager_t_impl*)manager;
-    if (!m) return;
+    if (!m || !m->font) return;
     
-    print_header("VitaCast - Main Menu");
-    printf("\n");
-    printf("  %s 🎙️  Podcasts\n", m->selected_item == 0 ? "►" : " ");
-    printf("  %s 🎵  Apple Music\n", m->selected_item == 1 ? "►" : " ");
-    printf("  %s ▶️  Player\n", m->selected_item == 2 ? "►" : " ");
-    printf("  %s 🔍  Search\n", m->selected_item == 3 ? "►" : " ");
-    printf("  %s 📥  Downloads\n", m->selected_item == 4 ? "►" : " ");
-    printf("  %s ⚙️  Settings\n", m->selected_item == 5 ? "►" : " ");
-    printf("  %s 🚪  Exit\n", m->selected_item == 6 ? "►" : " ");
-    printf("\n");
-    printf("  ✕ Select  ○ Back  START Exit\n");
+    const float start_y = 100.0f;
+    const float line_height = 50.0f;
+    const float start_x = 100.0f;
+    const unsigned int color_normal = RGBA8(255, 255, 255, 255);
+    const unsigned int color_selected = RGBA8(0, 162, 232, 255);
+    
+    // Título
+    vita2d_pgf_draw_text(m->font, 100, 60, color_selected, 1.0f, "VitaCast - Main Menu");
+    
+    // Items del menú
+    const char* menu_items[] = {
+        "Podcasts",
+        "Apple Music",
+        "Player",
+        "Search",
+        "Downloads",
+        "Settings",
+        "Exit"
+    };
+    
+    for (int i = 0; i < 7; i++) {
+        float y = start_y + (i * line_height);
+        unsigned int color = (m->selected_item == i) ? color_selected : color_normal;
+        const char* marker = (m->selected_item == i) ? "► " : "  ";
+        
+        vita2d_pgf_draw_text(m->font, start_x, y, color, 0.8f, "%s%s", marker, menu_items[i]);
+    }
+    
+    // Controles
+    vita2d_pgf_draw_text(m->font, 100, 500, RGBA8(180, 180, 180, 255), 0.6f, 
+                        "X: Select  O: Back  START: Exit");
 }
 
 void ui_manager_render_podcasts(ui_manager_t* manager) {
-    (void)manager;
-    print_header("Podcasts - Subscribed Shows");
-    printf("\n");
-    printf("  📻 Tech Talk Weekly\n");
-    printf("     Last: Episode 142 - AI Revolution (45:23)\n");
-    printf("\n");
-    printf("  🎯 The Daily\n");
-    printf("     Last: Today's Top Stories (23:15)\n");
-    printf("\n");
-    printf("  💼 Business Insights\n");
-    printf("     Last: Market Analysis Q4 (38:42)\n");
-    printf("\n");
-    printf("  ✕ Play  ○ Back\n");
+    ui_manager_t_impl* m = (ui_manager_t_impl*)manager;
+    if (!m || !m->font) return;
+    
+    const unsigned int color_title = RGBA8(0, 162, 232, 255);
+    const unsigned int color_text = RGBA8(255, 255, 255, 255);
+    const unsigned int color_subtext = RGBA8(180, 180, 180, 255);
+    
+    vita2d_pgf_draw_text(m->font, 100, 60, color_title, 1.0f, "Podcasts - Subscribed Shows");
+    
+    float y = 120.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.8f, "Tech Talk Weekly");
+    y += 30.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Episode 142 - AI Revolution (45:23)");
+    
+    y += 60.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.8f, "The Daily");
+    y += 30.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Today's Top Stories (23:15)");
+    
+    y += 60.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.8f, "Business Insights");
+    y += 30.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Market Analysis Q4 (38:42)");
+    
+    vita2d_pgf_draw_text(m->font, 100, 500, color_subtext, 0.6f, "X: Play  O: Back");
 }
 
 void ui_manager_render_music(ui_manager_t* manager) {
-    (void)manager;
-    print_header("Apple Music - Your Library");
-    printf("\n");
-    printf("  🎵 Recently Played:\n");
-    printf("     • Summer Vibes Playlist (24 songs)\n");
-    printf("     • Chill Lo-Fi Beats (18 songs)\n");
-    printf("     • Rock Classics (42 songs)\n");
-    printf("\n");
-    printf("  📀 Albums:\n");
-    printf("     • Random Access Memories - Daft Punk\n");
-    printf("     • Thriller - Michael Jackson\n");
-    printf("\n");
-    printf("  ✕ Play  ○ Back\n");
+    ui_manager_t_impl* m = (ui_manager_t_impl*)manager;
+    if (!m || !m->font) return;
+    
+    const unsigned int color_title = RGBA8(0, 162, 232, 255);
+    const unsigned int color_text = RGBA8(255, 255, 255, 255);
+    const unsigned int color_subtext = RGBA8(180, 180, 180, 255);
+    
+    vita2d_pgf_draw_text(m->font, 100, 60, color_title, 1.0f, "Apple Music - Your Library");
+    
+    float y = 120.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Recently Played:");
+    y += 40.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• Summer Vibes Playlist (24 songs)");
+    y += 35.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• Chill Lo-Fi Beats (18 songs)");
+    y += 35.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• Rock Classics (42 songs)");
+    
+    y += 50.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Albums:");
+    y += 40.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• Random Access Memories - Daft Punk");
+    y += 35.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• Thriller - Michael Jackson");
+    
+    vita2d_pgf_draw_text(m->font, 100, 500, color_subtext, 0.6f, "X: Play  O: Back");
 }
 
 void ui_manager_render_player(ui_manager_t* manager) {
-    (void)manager;
-    print_header("Now Playing");
-    printf("\n");
-    printf("  🎵 Tech Talk Weekly - Episode 142\n");
-    printf("     AI Revolution and the Future\n");
-    printf("\n");
-    printf("  ▶️  Playing...\n");
-    printf("\n");
-    printf("  Progress: [████████████────────] 12:34 / 45:23\n");
-    printf("\n");
-    printf("  Volume: ████████░░ 80%%\n");
-    printf("\n");
-    printf("  ⏮️ Prev  ⏸️ Pause  ⏭️ Next  ○ Back\n");
+    ui_manager_t_impl* m = (ui_manager_t_impl*)manager;
+    if (!m || !m->font) return;
+    
+    const unsigned int color_title = RGBA8(0, 162, 232, 255);
+    const unsigned int color_text = RGBA8(255, 255, 255, 255);
+    const unsigned int color_subtext = RGBA8(180, 180, 180, 255);
+    
+    vita2d_pgf_draw_text(m->font, 100, 60, color_title, 1.0f, "Now Playing");
+    
+    float y = 150.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 1.0f, "Tech Talk Weekly");
+    y += 40.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.8f, "Episode 142 - AI Revolution");
+    y += 50.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_subtext, 0.7f, "Playing...");
+    
+    y += 80.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Progress: 12:34 / 45:23");
+    y += 40.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Volume: 80%%");
+    
+    vita2d_pgf_draw_text(m->font, 100, 500, color_subtext, 0.6f, "Triangle: Prev  X: Pause  Square: Next  O: Back");
 }
 
 void ui_manager_render_settings(ui_manager_t* manager) {
-    (void)manager;
-    print_header("Settings");
-    printf("\n");
-    printf("  🔊 Audio:\n");
-    printf("     Volume: 80%%\n");
-    printf("     Quality: High (320kbps)\n");
-    printf("\n");
-    printf("  📡 Network:\n");
-    printf("     WiFi: Connected\n");
-    printf("     Auto-Download: Enabled\n");
-    printf("\n");
-    printf("  🍎 Apple Account:\n");
-    printf("     Status: Signed In\n");
-    printf("     Sync: Enabled\n");
-    printf("\n");
-    printf("  💾 Storage:\n");
-    printf("     Cache: 245 MB / 1 GB\n");
-    printf("\n");
-    printf("  ✕ Modify  ○ Back\n");
+    ui_manager_t_impl* m = (ui_manager_t_impl*)manager;
+    if (!m || !m->font) return;
+    
+    const unsigned int color_title = RGBA8(0, 162, 232, 255);
+    const unsigned int color_text = RGBA8(255, 255, 255, 255);
+    const unsigned int color_subtext = RGBA8(180, 180, 180, 255);
+    
+    vita2d_pgf_draw_text(m->font, 100, 60, color_title, 1.0f, "Settings");
+    
+    float y = 120.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Audio:");
+    y += 35.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Volume: 80%%");
+    y += 30.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Quality: High (320kbps)");
+    
+    y += 50.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Network:");
+    y += 35.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "WiFi: Connected");
+    y += 30.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Auto-Download: Enabled");
+    
+    y += 50.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Apple Account:");
+    y += 35.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Status: Signed In");
+    
+    y += 50.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Storage:");
+    y += 35.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Cache: 245 MB / 1 GB");
+    
+    vita2d_pgf_draw_text(m->font, 100, 500, color_subtext, 0.6f, "X: Modify  O: Back");
 }
 
 void ui_manager_render_search(ui_manager_t* manager) {
-    (void)manager;
-    print_header("Search Podcasts");
-    printf("\n");
-    printf("  🔍 Search: [tech_______________]\n");
-    printf("\n");
-    printf("  Results:\n");
-    printf("  📻 Tech Talk Weekly\n");
-    printf("     Technology news and analysis\n");
-    printf("     ⭐⭐⭐⭐⭐ (4.8) - 142 episodes\n");
-    printf("\n");
-    printf("  📻 TechCrunch\n");
-    printf("     Startup and technology news\n");
-    printf("     ⭐⭐⭐⭐ (4.5) - 89 episodes\n");
-    printf("\n");
-    printf("  ✕ Subscribe  ○ Back\n");
+    ui_manager_t_impl* m = (ui_manager_t_impl*)manager;
+    if (!m || !m->font) return;
+    
+    const unsigned int color_title = RGBA8(0, 162, 232, 255);
+    const unsigned int color_text = RGBA8(255, 255, 255, 255);
+    const unsigned int color_subtext = RGBA8(180, 180, 180, 255);
+    
+    vita2d_pgf_draw_text(m->font, 100, 60, color_title, 1.0f, "Search Podcasts");
+    
+    float y = 120.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Search: tech");
+    
+    y += 60.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Results:");
+    y += 40.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.8f, "Tech Talk Weekly");
+    y += 30.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Technology news and analysis");
+    y += 25.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.5f, "Rating: 4.8 - 142 episodes");
+    
+    y += 50.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.8f, "TechCrunch");
+    y += 30.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "Startup and technology news");
+    y += 25.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.5f, "Rating: 4.5 - 89 episodes");
+    
+    vita2d_pgf_draw_text(m->font, 100, 500, color_subtext, 0.6f, "X: Subscribe  O: Back");
 }
 
 void ui_manager_render_downloads(ui_manager_t* manager) {
-    (void)manager;
-    print_header("Downloads");
-    printf("\n");
-    printf("  📥 Queue:\n");
-    printf("     [████████████░░░░] 75%% - Tech Talk Ep. 143\n");
-    printf("     [████░░░░░░░░░░░░] 25%% - The Daily - Today\n");
-    printf("\n");
-    printf("  ✅ Completed:\n");
-    printf("     • Tech Talk Weekly - Episode 142 (45 MB)\n");
-    printf("     • Business Insights - Q4 Analysis (38 MB)\n");
-    printf("     • The Daily - Yesterday (23 MB)\n");
-    printf("\n");
-    printf("  💾 Total: 245 MB\n");
-    printf("\n");
-    printf("  ✕ Manage  ○ Back\n");
+    ui_manager_t_impl* m = (ui_manager_t_impl*)manager;
+    if (!m || !m->font) return;
+    
+    const unsigned int color_title = RGBA8(0, 162, 232, 255);
+    const unsigned int color_text = RGBA8(255, 255, 255, 255);
+    const unsigned int color_subtext = RGBA8(180, 180, 180, 255);
+    
+    vita2d_pgf_draw_text(m->font, 100, 60, color_title, 1.0f, "Downloads");
+    
+    float y = 120.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Queue:");
+    y += 40.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "75%% - Tech Talk Ep. 143");
+    y += 35.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "25%% - The Daily - Today");
+    
+    y += 60.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Completed:");
+    y += 40.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• Tech Talk Weekly Ep. 142 (45 MB)");
+    y += 35.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• Business Insights Q4 (38 MB)");
+    y += 35.0f;
+    vita2d_pgf_draw_text(m->font, 120, y, color_subtext, 0.6f, "• The Daily Yesterday (23 MB)");
+    
+    y += 50.0f;
+    vita2d_pgf_draw_text(m->font, 100, y, color_text, 0.7f, "Total: 245 MB");
+    
+    vita2d_pgf_draw_text(m->font, 100, 500, color_subtext, 0.6f, "X: Manage  O: Back");
 }
 
 app_state_t ui_manager_get_requested_state(ui_manager_t* manager) {

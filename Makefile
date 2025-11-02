@@ -26,6 +26,7 @@ CFLAGS += -std=c11
 CFLAGS += -DVITA
 CFLAGS += -I.
 CFLAGS += -fno-use-linker-plugin
+CFLAGS += $(shell $(PREFIX)pkg-config --cflags vita2d 2>/dev/null || echo "-I$$VITASDK/arm-vita-eabi/include")
 
 # Flags para release
 RELEASE_CFLAGS = -Wl,-q -O3
@@ -34,6 +35,7 @@ RELEASE_CFLAGS += -std=c11
 RELEASE_CFLAGS += -DVITA -DNDEBUG
 RELEASE_CFLAGS += -I.
 RELEASE_CFLAGS += -fno-use-linker-plugin
+RELEASE_CFLAGS += $(shell $(PREFIX)pkg-config --cflags vita2d 2>/dev/null || echo "-I$$VITASDK/arm-vita-eabi/include")
 
 # Archivos fuente
 SOURCES = main.c \
@@ -54,7 +56,10 @@ LIBS = -lSceDisplay_stub \
        -lSceNet_stub \
        -lSceNetCtl_stub \
        -lSceSysmodule_stub \
-       -lSceCommonDialog_stub
+       -lSceCommonDialog_stub \
+       -lvita2d \
+       -lSceGxm_stub \
+       -lSceAppMgr_stub
 
 # Targets principales
 .PHONY: all clean release debug install
