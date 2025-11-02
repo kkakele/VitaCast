@@ -28,15 +28,10 @@ jobs:
         
         export VITASDK=/usr/local/vitasdk
         
-        # IMPORTANTE: Eliminar directorio ANTES de crear nuevo
-        echo "Verificando directorio VitaSDK existente..."
-        if [ -d "$VITASDK" ]; then
-          echo "Eliminando directorio VitaSDK existente..."
-          sudo rm -rf $VITASDK
-          echo "Directorio eliminado exitosamente"
-        else
-          echo "No existe directorio previo, continuando..."
-        fi
+        # CRÍTICO: Eliminar directorio SIEMPRE antes de instalar
+        echo "Eliminando cualquier instalación previa de VitaSDK..."
+        sudo rm -rf $VITASDK 2>/dev/null || true
+        echo "Directorio limpio"
         
         # También limpiar vdpm si existe
         if [ -d "$HOME/vdpm" ]; then
@@ -44,18 +39,19 @@ jobs:
           rm -rf $HOME/vdpm
         fi
         
-        # Crear directorio VitaSDK desde cero
-        echo "Creando directorio VitaSDK..."
-        sudo mkdir -p $VITASDK
-        sudo chown -R $USER:$USER $VITASDK
-        
         # Clonar vdpm
         echo "Clonando vdpm..."
         cd $HOME
         git clone https://github.com/vitasdk/vdpm
         cd vdpm
         
-        # Instalar VitaSDK
+        # Verificar una vez más que el directorio no existe antes de instalar
+        if [ -d "$VITASDK" ]; then
+          echo "ERROR: Directorio todavía existe, eliminando forzadamente..."
+          sudo rm -rf $VITASDK
+        fi
+        
+        # Instalar VitaSDK (el script creará el directorio)
         echo "Instalando VitaSDK (esto puede tomar varios minutos)..."
         ./bootstrap-vitasdk.sh
         
