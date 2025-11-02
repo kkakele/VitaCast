@@ -29,8 +29,6 @@ jobs:
           echo "$VITASDK/bin" >> $GITHUB_PATH
         
       - name: Build VitaCast
-        env:
-          VITASDK: /usr/local/vitasdk
         run: |
           export PATH=$VITASDK/bin:$PATH
           make release
