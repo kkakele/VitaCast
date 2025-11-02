@@ -49,9 +49,8 @@ OBJECTS = $(SOURCES:%.c=$(BUILD_DIR)/%.o)
 # Bibliotecas del sistema
 LIBS = -lSceDisplay_stub \
        -lSceCtrl_stub \
-       -lSceKernel_stub \
+       -lSceLibKernel_stub \
        -lSceAudio_stub \
-       -lSceAudioOut_stub \
        -lSceNet_stub \
        -lSceNetCtl_stub \
        -lSceSysmodule_stub \
