@@ -23,8 +23,8 @@ jobs:
       run: |
         set -e
         
-        sudo apt-get update
-        sudo apt-get install -y make git cmake python3 wget curl build-essential
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq make git cmake python3 wget curl build-essential
         
         export VITASDK=/usr/local/vitasdk
         
@@ -55,17 +55,28 @@ jobs:
         echo "Instalando VitaSDK (esto puede tomar varios minutos)..."
         ./bootstrap-vitasdk.sh
         
-        # Instalar paquetes necesarios
-        echo "Instalando paquetes adicionales..."
+        # Instalar paquetes necesarios ANTES de compilar
+        echo "Instalando vita2d..."
         ./vdpm vita2d
+        echo "vita2d instalado exitosamente"
+        
+        echo "Instalando curl..."
+        ./vdpm curl
+        echo "curl instalado exitosamente"
         
         # Configurar variables de entorno para siguientes pasos
         echo "VITASDK=$VITASDK" >> $GITHUB_ENV
         echo "$VITASDK/bin" >> $GITHUB_PATH
+        echo "VITA2D_CFLAGS=-I$VITASDK/arm-vita-eabi/include" >> $GITHUB_ENV
+        echo "VITA2D_LIBS=-L$VITASDK/arm-vita-eabi/lib" >> $GITHUB_ENV
         
         # Verificar instalación
         export PATH=$VITASDK/bin:$PATH
-        arm-vita-eabi-gcc --version || echo "Advertencia: gcc no encontrado"
+        echo "Verificando compilador..."
+        arm-vita-eabi-gcc --version
+        echo "Verificando vita2d..."
+        ls -la $VITASDK/arm-vita-eabi/include/vita2d.h || echo "Advertencia: vita2d.h no encontrado en ubicación esperada"
+        ls -la $VITASDK/arm-vita-eabi/lib/*vita2d* || echo "Advertencia: libvita2d no encontrada"
     
     - name: Install additional dependencies
       env:
@@ -83,8 +94,24 @@ jobs:
         export PATH=$VITASDK/bin:$PATH
         export VITASDK=/usr/local/vitasdk
         
-        make -f Makefile_final clean || true
-        make -f Makefile_final release
+        # Asegurar que vita2d está disponible
+        echo "Buscando vita2d..."
+        find $VITASDK -name "vita2d.h" -o -name "*vita2d*" | head -20
+        
+        # Compilar con flags correctos
+        echo "Compilando main_complete.c..."
+        make -f Makefile_final clean
+        make -f Makefile_final release 2>&1 | tee build.log
+        
+        # Verificar que el VPK se creó
+        if [ ! -f VitaCast.vpk ]; then
+          echo "ERROR: VPK no se creó"
+          echo "=== LOG DE COMPILACION ==="
+          cat build.log
+          exit 1
+        fi
+        
+        echo "VPK creado exitosamente"
     
     - name: Generate checksums
       run: |

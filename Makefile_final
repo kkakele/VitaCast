@@ -13,6 +13,15 @@ PREFIX = arm-vita-eabi
 CC = $(PREFIX)-gcc
 CFLAGS = -Wl,-q -Wall -O3 -std=c99
 
+# Agregar includes de vita2d y otras librerías
+ifdef VITASDK
+  CFLAGS += -I$(VITASDK)/arm-vita-eabi/include
+  CFLAGS += -I$(VITASDK)/arm-vita-eabi/include/vita2d
+  LDFLAGS = -L$(VITASDK)/arm-vita-eabi/lib
+else
+  $(warning VITASDK no está configurado, usando rutas por defecto)
+endif
+
 # VPK metadata (TITLE_ID debe tener exactamente 9 caracteres)
 TITLE_ID = VCAST2000
 APP_VER = 02.01
@@ -36,7 +45,7 @@ $(TARGET).vpk: eboot.bin
 
 eboot.bin: $(OBJS)
 	@echo "Enlazando eboot.bin..."
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ $(LIBS) -o $@
 
 %.o: %.c
 	@echo "Compilando $<..."
