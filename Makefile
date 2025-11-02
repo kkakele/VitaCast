@@ -57,7 +57,6 @@ LIBS = -lSceDisplay_stub \
        -lSceNetCtl_stub \
        -lSceSysmodule_stub \
        -lSceCommonDialog_stub \
-       -lSceFont_stub \
        -lSceGxm_stub \
        -lSceAppMgr_stub \
        -lvita2d \
