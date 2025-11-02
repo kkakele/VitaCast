@@ -9,27 +9,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: vitasdk/vitasdk:latest
+      
     steps:
       - uses: actions/checkout@v4
       
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y curl git build-essential cmake python3 python3-pip libpng-dev zlib1g-dev libtiff-dev libjpeg-dev
-      
-      - name: Set up VitaSDK
-        run: |
-          export VITASDK=$HOME/vitasdk
-          mkdir -p $VITASDK
-          # Usar el script oficial de instalaci?n de VitaSDK
-          git clone https://github.com/vitasdk/buildscripts.git /tmp/vitasdk-buildscripts
-          cd /tmp/vitasdk-buildscripts
-          export VITASDK=$VITASDK
-          # El script build.sh es el correcto
-          bash build.sh
-          echo "VITASDK=$VITASDK" >> $GITHUB_ENV
-          echo "$VITASDK/bin" >> $GITHUB_PATH
-        
       - name: Build VitaCast
         run: |
           export PATH=$VITASDK/bin:$PATH
