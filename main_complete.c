@@ -1,12 +1,16 @@
-#include <vitasdk.h>
+#include <psp2/ctrl.h>
+#include <psp2/kernel/processmgr.h>
+#include <psp2/display.h>
+#include <psp2/types.h>
 #include <vita2d.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <curl/curl.h>
 
 #define APP_TITLE "VitaCast"
-#define APP_VERSION "1.0.0"
+#define APP_VERSION "2.0.1"
 
 typedef enum {
     APP_STATE_MAIN_MENU,
@@ -31,12 +35,27 @@ typedef struct {
 static vita_cast_app_t *app = NULL;
 
 static int vita_cast_init() {
-    vita2d_init();
+    // Configurar modo de entrada del controlador
+    sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG);
+    
+    // Inicializar vita2d para gráficos
+    int ret = vita2d_init();
+    if (ret < 0) {
+        printf("Error al inicializar vita2d: 0x%08X\n", ret);
+        return -1;
+    }
+    
     vita2d_set_clear_color(RGBA8(0x00, 0x00, 0x00, 0xFF));
+    
+    // Inicializar curl para funciones de red (opcional)
     curl_global_init(CURL_GLOBAL_DEFAULT);
     
     app = malloc(sizeof(vita_cast_app_t));
-    if (!app) return -1;
+    if (!app) {
+        curl_global_cleanup();
+        vita2d_fini();
+        return -1;
+    }
     
     memset(app, 0, sizeof(vita_cast_app_t));
     app->running = 1;
@@ -51,6 +70,7 @@ static int vita_cast_init() {
     strcpy(app->menu_texts[2], "Reproductor");
     strcpy(app->menu_texts[3], "Configuracion");
     
+    // Intentar cargar texturas (no crítico si fallan)
     app->background_texture = vita2d_load_PNG_file("app0:/assets/background.png");
     app->icon_texture = vita2d_load_PNG_file("app0:/assets/icon0.png");
     
@@ -209,8 +229,12 @@ static void vita_cast_update() {
     handle_input();
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+    (void)argc;
+    (void)argv;
+    
     if (vita_cast_init() < 0) {
+        sceKernelExitProcess(-1);
         return -1;
     }
     
@@ -221,5 +245,8 @@ int main() {
     }
     
     vita_cast_cleanup();
+    
+    // Salir correctamente
+    sceKernelExitProcess(0);
     return 0;
 }

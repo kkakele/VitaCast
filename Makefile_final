@@ -1,0 +1,89 @@
+TARGET = VitaCast
+# Usar main_complete.o para version con mas funciones visuales
+# o main_final.o para version mas simple
+OBJS = main_complete.o
+
+# Bibliotecas necesarias para vita2d y funcionalidades de red
+LIBS = -lvita2d -lSceGxm_stub -lSceDisplay_stub -lSceCtrl_stub \
+       -lSceLibKernel_stub -lScePgf_stub -lpng -ljpeg -lz -lm \
+       -lfreetype -lcurl -lssl -lcrypto -lSceNet_stub -lSceNetCtl_stub \
+       -lSceHttp_stub -lSceSsl_stub -lSceAppUtil_stub
+
+PREFIX = arm-vita-eabi
+CC = $(PREFIX)-gcc
+CFLAGS = -Wl,-q -Wall -O3 -std=c99
+
+# VPK metadata (TITLE_ID debe tener exactamente 9 caracteres)
+TITLE_ID = VCAST2000
+APP_VER = 02.01
+CONTENT_ID = UP0000-$(TITLE_ID)_00-0000000000000000
+
+all: $(TARGET).vpk
+
+$(TARGET).vpk: eboot.bin
+	@echo "Generando param.sfo..."
+	vita-mksfoex -s TITLE_ID=$(TITLE_ID) -s APP_VER=$(APP_VER) \
+	  -s CONTENT_ID=$(CONTENT_ID) "$(TARGET)" param.sfo
+	@echo "Empaquetando VPK..."
+	vita-pack-vpk -s param.sfo -b eboot.bin \
+	  -a sce_sys/icon0.png=sce_sys/icon0.png \
+	  -a sce_sys/livearea/contents/bg.png=sce_sys/livearea/contents/bg.png \
+	  -a sce_sys/livearea/contents/bg0.png=sce_sys/livearea/contents/bg0.png \
+	  -a sce_sys/livearea/contents/startup.png=sce_sys/livearea/contents/startup.png \
+	  -a sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
+	  $(TARGET).vpk
+	@echo "VPK creado exitosamente: $(TARGET).vpk"
+
+eboot.bin: $(OBJS)
+	@echo "Enlazando eboot.bin..."
+	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+
+%.o: %.c
+	@echo "Compilando $<..."
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	@echo "Limpiando archivos de compilación..."
+	rm -rf $(TARGET).vpk eboot.bin param.sfo $(OBJS)
+
+# Versión debug con símbolos de depuración
+debug: CFLAGS = -Wl,-q -Wall -g -O0 -std=c99 -DDEBUG
+debug: clean all
+	@echo "Versión debug compilada"
+
+# Versión release optimizada
+release: CFLAGS = -Wl,-q -Wall -O3 -std=c99 -DNDEBUG
+release: clean all
+	@echo "Versión release compilada y optimizada"
+
+# Cambiar a versión simple
+simple:
+	@echo "Cambiando a versión simple..."
+	@sed -i 's/OBJS = .*/OBJS = main_final.o/' Makefile_final
+	@echo "Ahora ejecuta: make -f Makefile_final"
+
+# Cambiar a versión completa
+complete:
+	@echo "Cambiando a versión completa..."
+	@sed -i 's/OBJS = .*/OBJS = main_complete.o/' Makefile_final
+	@echo "Ahora ejecuta: make -f Makefile_final"
+
+# Mostrar información
+info:
+	@echo "============================================"
+	@echo "  VitaCast Build System v$(APP_VER)"
+	@echo "============================================"
+	@echo "Versión actual: $(OBJS)"
+	@echo "TITLE_ID: $(TITLE_ID)"
+	@echo "APP_VER: $(APP_VER)"
+	@echo ""
+	@echo "Comandos disponibles:"
+	@echo "  make -f Makefile_final          - Compilar versión normal"
+	@echo "  make -f Makefile_final debug    - Compilar versión debug"
+	@echo "  make -f Makefile_final release  - Compilar versión release optimizada"
+	@echo "  make -f Makefile_final clean    - Limpiar archivos"
+	@echo "  make -f Makefile_final info     - Mostrar esta información"
+	@echo ""
+
+.PHONY: clean debug release simple complete info all
+

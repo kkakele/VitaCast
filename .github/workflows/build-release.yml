@@ -1,0 +1,70 @@
+name: Build VitaCast Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build'
+        required: true
+        default: '2.0.1'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup VitaSDK
+      uses: vitasdk/setup-vitasdk@v1
+      with:
+        version: 'latest'
+    
+    - name: Install dependencies
+      run: |
+        vdpm vita2d
+    
+    - name: Build VitaCast
+      run: |
+        make -f Makefile_final clean || true
+        make -f Makefile_final release
+    
+    - name: Generate checksums
+      run: |
+        md5sum VitaCast.vpk > VitaCast-v${GITHUB_REF#refs/tags/v}.md5
+        sha256sum VitaCast.vpk > VitaCast-v${GITHUB_REF#refs/tags/v}.sha256
+    
+    - name: Rename VPK
+      run: |
+        mv VitaCast.vpk VitaCast-v${GITHUB_REF#refs/tags/v}.vpk
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.ref }}
+        name: VitaCast ${{ github.ref_name }} - Release
+        body: |
+          # VitaCast ${{ github.ref_name }} - Release Compilado
+          
+          Este release fue compilado automáticamente por GitHub Actions.
+          
+          ## Archivos incluidos
+          - VitaCast-${{ github.ref_name }}.vpk
+          - Checksums MD5 y SHA256
+          - INSTALL.md
+          - RELEASE_NOTES.md
+          
+          Ver RELEASE_NOTES.md para detalles completos.
+        files: |
+          VitaCast-v*.vpk
+          VitaCast-v*.md5
+          VitaCast-v*.sha256
+          INSTALL.md
+          RELEASE_NOTES.md
+        draft: false
+        prerelease: false
+

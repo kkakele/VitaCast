@@ -1,0 +1,52 @@
+═══════════════════════════════════════════════════════════
+  CONFIGURAR GIT ANTES DE SUBIR
+═══════════════════════════════════════════════════════════
+
+Ejecuta estos 2 comandos en PowerShell
+(reemplaza con TUS DATOS REALES):
+
+1. Configura tu nombre:
+   git config --global user.name "Tu Nombre Aqui"
+   
+   Ejemplo:
+   git config --global user.name "Juan Perez"
+
+2. Configura tu email de GitHub:
+   git config --global user.email "tuemail@ejemplo.com"
+   
+   Ejemplo:
+   git config --global user.email "juan@gmail.com"
+
+═══════════════════════════════════════════════════════════
+  DESPUÉS DE CONFIGURAR GIT:
+═══════════════════════════════════════════════════════════
+
+Ejecuta el script de nuevo:
+   .\SUBIR_RELEASE_SIMPLE.ps1
+
+═══════════════════════════════════════════════════════════
+  O SI PREFIERES: MÉTODO MANUAL (MÁS SIMPLE)
+═══════════════════════════════════════════════════════════
+
+No necesitas configurar Git ni scripts.
+Solo ve a GitHub.com y sube los archivos manualmente:
+
+1. Ve a: https://github.com (inicia sesión)
+2. Crea un repositorio llamado "VitaCast"
+3. Ve a "Releases" → "Create a new release"
+4. Tag: v2.0.1
+5. Arrastra estos archivos:
+   - VitaCast-v2.0.1.vpk
+   - VitaCast-v2.0.1.md5
+   - VitaCast-v2.0.1.sha256
+   - INSTALL.md
+   - RELEASE_NOTES.md
+6. Publica
+
+TIEMPO: 5 minutos
+SIN NECESIDAD DE GIT NI COMANDOS
+
+Ver: SUBIR_MANUAL_GITHUB.md (ya está abierto en Notepad)
+
+═══════════════════════════════════════════════════════════
+

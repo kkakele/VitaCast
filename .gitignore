@@ -1,65 +1,78 @@
-# VitaCast - PlayStation Vita Podcast & Music App
-# Git ignore file
+# VitaCast .gitignore
 
-# Compiled binaries
+# Archivos de compilación
 *.o
-*.bin
-eboot.bin
-
-# VPK files (keep only the final ones)
-*.vpk
-!VitaCast-Functional.vpk
-!VitaCast-Final-v2.0.vpk
-
-# Temporary files
-temp_*
-*.tmp
-*.temp
-
-# Build artifacts
 *.elf
-*.so
-*.a
+*.velf
+*.self
+eboot.bin
+param.sfo
 
-# IDE files
+# VPK (excepto releases)
+*.vpk
+
+# Directorios de build temporales
+build/
+temp_vpk*/
+_vpk_build/
+_assets_tmp/
+
+# Logs y debugging
+*.log
+debug/
+*.dmp
+
+# Assets temporales (mantener originales en sce_sys)
+*.psd
+*.xcf
+*.ai
+*.sketch
+
+# IDE y editores
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.DS_Store
+Thumbs.db
 
-# OS files
+# Sistema operativo
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# Logs
-*.log
-
-# Cache directories
-cache/
-downloads/
-
-# Personal data (don't commit user data)
-data/
-storage/
-
 # Backup files
 *.bak
 *.backup
+*~
 
-# PowerShell scripts (keep only essential ones)
-build_*.ps1
-!build_final.ps1
+# Dependencias (si se usan)
+node_modules/
+vendor/
 
-# Keep important files
-!README.md
-!Makefile_complete
-!setup_vitacast.sh
-!*.h
-!*.c
-!assets/
-!ui/
-!audio/
-!network/
-!apple/
+# Archivos de configuración personal
+.env
+config.local.*
+
+# Compilación de Windows
+*.exe
+*.dll
+*.lib
+*.obj
+
+# Core dumps
+core
+core.*
+
+# Tests
+test_output/
+*.test
+
+# Documentación generada
+docs/generated/
+html/
+latex/
+
+# Mantener estructura de directorios vacíos
+!.gitkeep
