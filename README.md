@@ -76,19 +76,36 @@ VitaCast/
 
 ## 🚀 Instalación y Compilación
 
-### Compilación
+### Instalación de VitaSDK
+
+Primero necesitas instalar VitaSDK:
+
 ```bash
-# Compilar proyecto completo
-make -f Makefile_complete
+# Opción 1: Script automatizado (Linux/macOS)
+export VITASDK=/usr/local/vitasdk
+export PATH=$VITASDK/bin:$PATH
+git clone https://github.com/vitasdk/buildscripts.git
+cd buildscripts
+./build.sh
 
-# Compilar versión de debug
-make -f Makefile_complete debug
+# Opción 2: Usando Docker (más rápido)
+docker pull vitasdk/vitasdk
+```
 
-# Compilar versión optimizada
-make -f Makefile_complete release
+### Compilación
+
+```bash
+# Compilar versión release optimizada (recomendado)
+make release
+
+# Compilar versión normal
+make
+
+# Compilar versión debug
+make debug
 
 # Limpiar archivos de compilación
-make -f Makefile_complete clean
+make clean
 ```
 
 ### Instalación en PS Vita

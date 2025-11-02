@@ -1,139 +1,172 @@
+##############################################
+# VitaCast - PlayStation Vita Homebrew
+# Makefile siguiendo estándares homebrew
+##############################################
+
+# Información de la aplicación
 TARGET = VitaCast
-TITLE_ID = VCAST2000
-APP_VER = 02.01
+TITLE_ID = VCAST001
+APP_VER = 03.00
 CONTENT_ID = UP0000-$(TITLE_ID)_00-0000000000000000
 
+# Directorios
+BUILD_DIR = build
+VPK_DIR = $(BUILD_DIR)/vpk
+
+# Herramientas VitaSDK
+PREFIX = arm-vita-eabi-
+CC = $(PREFIX)gcc
+STRIP = $(PREFIX)strip
+OBJCOPY = $(PREFIX)objcopy
+
+# Flags de compilación
+CFLAGS = -Wl,-q -O2 -g
+CFLAGS += -Wall -Wextra -Wpedantic
+CFLAGS += -std=c11
+CFLAGS += -DVITA
+CFLAGS += -I.
+CFLAGS += -fno-use-linker-plugin
+
+# Flags para release
+RELEASE_CFLAGS = -Wl,-q -O3
+RELEASE_CFLAGS += -Wall -Wextra
+RELEASE_CFLAGS += -std=c11
+RELEASE_CFLAGS += -DVITA -DNDEBUG
+RELEASE_CFLAGS += -I.
+RELEASE_CFLAGS += -fno-use-linker-plugin
+
 # Archivos fuente
-OBJS = main.o \
-       ui/ui_manager.o \
-       audio/audio_player.o \
-       audio/atrac_decoder.o \
-       network/network_manager.o \
-       apple/apple_sync.o
+SOURCES = main.c \
+          ui/ui_manager.c \
+          audio/audio_player.c \
+          audio/atrac_decoder.c \
+          network/network_manager.c \
+          apple/apple_sync.c
 
-# Compilador y flags
-PREFIX = arm-vita-eabi
-CC = $(PREFIX)-gcc
-CFLAGS = -Wl,-q -Wall -O3 -std=c99 -I.
+# Archivos objeto
+OBJECTS = $(SOURCES:%.c=$(BUILD_DIR)/%.o)
 
-# Bibliotecas necesarias (sin vita2d)
+# Bibliotecas del sistema
 LIBS = -lSceDisplay_stub \
        -lSceCtrl_stub \
+       -lSceKernel_stub \
        -lSceAudio_stub \
        -lSceAudioOut_stub \
        -lSceNet_stub \
        -lSceNetCtl_stub \
        -lSceSysmodule_stub \
-       -lSceLibKernel_stub
+       -lSceCommonDialog_stub
 
-# Target principal
+# Targets principales
+.PHONY: all clean release debug install
+
 all: $(TARGET).vpk
 
-# Generar VPK
-$(TARGET).vpk: eboot.bin param.sfo
-	@echo "╔══════════════════════════════════════════════════════════════╗"
-	@echo "║  Empaquetando VitaCast v$(APP_VER)..."
-	@echo "╚══════════════════════════════════════════════════════════════╝"
-	vita-pack-vpk -s param.sfo -b eboot.bin \
-	  -a sce_sys/icon0.png=sce_sys/icon0.png \
-	  -a sce_sys/livearea/contents/bg.png=sce_sys/livearea/contents/bg.png \
-	  -a sce_sys/livearea/contents/bg0.png=sce_sys/livearea/contents/bg0.png \
-	  -a sce_sys/livearea/contents/startup.png=sce_sys/livearea/contents/startup.png \
-	  -a sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
-	  $(TARGET).vpk
-	@echo ""
-	@echo "╔══════════════════════════════════════════════════════════════╗"
-	@echo "║  ✅ VPK creado exitosamente: $(TARGET).vpk"
-	@echo "║  📦 Tamaño: $$(du -h $(TARGET).vpk | cut -f1)"
-	@echo "║  🎮 Instalar en PS Vita con VitaShell"
-	@echo "╚══════════════════════════════════════════════════════════════╝"
-	@echo ""
+release: CFLAGS = $(RELEASE_CFLAGS)
+release: clean $(TARGET).vpk
 
-# Generar param.sfo
+debug: CFLAGS += -DDEBUG -g -O0
+debug: clean $(TARGET).vpk
+
+# Crear VPK
+$(TARGET).vpk: $(BUILD_DIR)/eboot.bin param.sfo | $(VPK_DIR)
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo "  Empaquetando $(TARGET) v$(APP_VER)..."
+	@echo "═══════════════════════════════════════════════════════════"
+	vita-pack-vpk -s param.sfo \
+	              -b $(BUILD_DIR)/eboot.bin \
+	              -a sce_sys/icon0.png=sce_sys/icon0.png \
+	              -a sce_sys/livearea/contents/bg.png=sce_sys/livearea/contents/bg.png \
+	              -a sce_sys/livearea/contents/bg0.png=sce_sys/livearea/contents/bg0.png \
+	              -a sce_sys/livearea/contents/startup.png=sce_sys/livearea/contents/startup.png \
+	              -a sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
+	              $(TARGET).vpk
+	@echo ""
+	@echo "✅ VPK creado: $(TARGET).vpk"
+	@du -h $(TARGET).vpk | awk '{print "  📦 Tamaño: " $$1}'
+
+# Crear param.sfo
 param.sfo:
 	@echo "Generando param.sfo..."
-	vita-mksfoex -s TITLE_ID=$(TITLE_ID) -s APP_VER=$(APP_VER) \
-	  -s CONTENT_ID=$(CONTENT_ID) "$(TARGET)" param.sfo
+	vita-mksfoex -s TITLE_ID=$(TITLE_ID) \
+	             -s APP_VER=$(APP_VER) \
+	             -s CONTENT_ID=$(CONTENT_ID) \
+	             -s ATTRIBUTE=0x8000000000000000 \
+	             "$(TARGET)" param.sfo
 
-# Generar eboot.bin
-eboot.bin: $(TARGET).velf
+# Crear eboot.bin
+$(BUILD_DIR)/eboot.bin: $(BUILD_DIR)/$(TARGET).velf | $(BUILD_DIR)
 	@echo "Generando eboot.bin..."
-	vita-make-fself -c -s $(TARGET).velf eboot.bin
+	vita-make-fself $(BUILD_DIR)/$(TARGET).velf $(BUILD_DIR)/eboot.bin
 
-# Generar VELF
-$(TARGET).velf: $(TARGET).elf
+# Crear VELF
+$(BUILD_DIR)/$(TARGET).velf: $(BUILD_DIR)/$(TARGET).elf | $(BUILD_DIR)
 	@echo "Generando VELF..."
-	vita-elf-create $(TARGET).elf $(TARGET).velf
+	vita-elf-create $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).velf
 
 # Enlazar ELF
-$(TARGET).elf: $(OBJS)
-	@echo "╔══════════════════════════════════════════════════════════════╗"
-	@echo "║  Enlazando $(TARGET).elf..."
-	@echo "╚══════════════════════════════════════════════════════════════╝"
-	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) | $(BUILD_DIR)
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo "  Enlazando $(TARGET)..."
+	@echo "═══════════════════════════════════════════════════════════"
+	$(CC) $(CFLAGS) $(OBJECTS) $(LIBS) -o $@
 	@echo "✅ Enlazado completado"
 
-# Compilar archivos .c a .o
-%.o: %.c
+# Compilar archivos fuente
+$(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
+	@mkdir -p $(dir $@)
 	@echo "Compilando $<..."
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Limpiar archivos generados
+# Crear directorios
+$(BUILD_DIR):
+	@mkdir -p $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)/ui
+	@mkdir -p $(BUILD_DIR)/audio
+	@mkdir -p $(BUILD_DIR)/network
+	@mkdir -p $(BUILD_DIR)/apple
+
+$(VPK_DIR): $(BUILD_DIR)
+	@mkdir -p $(VPK_DIR)
+
+# Limpiar
 clean:
 	@echo "Limpiando archivos de compilación..."
-	rm -f $(TARGET).vpk $(TARGET).velf $(TARGET).elf eboot.bin param.sfo $(OBJS)
+	rm -rf $(BUILD_DIR)
+	rm -f $(TARGET).vpk
+	rm -f param.sfo
 	@echo "✅ Limpieza completada"
 
-# Compilación completa limpia
-rebuild: clean all
-
-# Versión debug
-debug: CFLAGS = -Wl,-q -Wall -g -O0 -std=c99 -DDEBUG -I.
-debug: clean all
-	@echo "╔══════════════════════════════════════════════════════════════╗"
-	@echo "║  ✅ Versión DEBUG compilada"
-	@echo "╚══════════════════════════════════════════════════════════════╝"
-
-# Versión release optimizada
-release: CFLAGS = -Wl,-q -Wall -O3 -std=c99 -DNDEBUG -I.
-release: clean all
-	@echo "╔══════════════════════════════════════════════════════════════╗"
-	@echo "║  ✅ Versión RELEASE compilada y optimizada"
-	@echo "╚══════════════════════════════════════════════════════════════╝"
+# Instalación (información)
+install: $(TARGET).vpk
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo "  Instrucciones de instalación:"
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo "1. Transfiere $(TARGET).vpk a tu PS Vita"
+	@echo "2. Abre VitaShell en tu PS Vita"
+	@echo "3. Navega a $(TARGET).vpk y presiona X para instalar"
+	@echo "═══════════════════════════════════════════════════════════"
 
 # Información del proyecto
 info:
-	@echo "╔══════════════════════════════════════════════════════════════╗"
-	@echo "║  VitaCast Build System v$(APP_VER)"
-	@echo "╚══════════════════════════════════════════════════════════════╝"
-	@echo ""
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo "  $(TARGET) Build Information"
+	@echo "═══════════════════════════════════════════════════════════"
 	@echo "📦 TITLE_ID: $(TITLE_ID)"
 	@echo "📌 APP_VER: $(APP_VER)"
 	@echo "🔖 CONTENT_ID: $(CONTENT_ID)"
 	@echo ""
 	@echo "📂 Archivos fuente:"
-	@for obj in $(OBJS); do echo "   • $$obj"; done
+	@for src in $(SOURCES); do echo "   • $$src"; done
 	@echo ""
 	@echo "📚 Bibliotecas:"
 	@for lib in $(LIBS); do echo "   • $$lib"; done
 	@echo ""
 	@echo "🔨 Comandos disponibles:"
 	@echo "   make          - Compilar versión normal"
-	@echo "   make clean    - Limpiar archivos"
-	@echo "   make rebuild  - Limpiar y recompilar"
+	@echo "   make release  - Compilar versión optimizada"
 	@echo "   make debug    - Compilar versión debug"
-	@echo "   make release  - Compilar versión release optimizada"
-	@echo "   make install  - Instalar en PS Vita (requiere FTP)"
+	@echo "   make clean    - Limpiar archivos"
+	@echo "   make install  - Mostrar instrucciones"
 	@echo "   make info     - Mostrar esta información"
-	@echo ""
-
-# Instalar en PS Vita (requiere conexión FTP configurada)
-install: $(TARGET).vpk
-	@echo "Para instalar en PS Vita:"
-	@echo "1. Abre VitaShell en tu PS Vita"
-	@echo "2. Transfiere $(TARGET).vpk a ux0:/data/"
-	@echo "3. En VitaShell, navega a $(TARGET).vpk y presiona X para instalar"
-	@echo ""
-	@echo "O usa: vita-install-vpk $(TARGET).vpk (si tienes configurado)"
-
-.PHONY: all clean rebuild debug release info install
+	@echo "═══════════════════════════════════════════════════════════"
