@@ -12,19 +12,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl git build-essential cmake python3 python3-pip libpng-dev zlib1g-dev libtiff-dev libjpeg-dev
+      
       - name: Set up VitaSDK
         run: |
           export VITASDK=$HOME/vitasdk
-          git clone https://github.com/vitasdk/vitasdk.git /tmp/vitasdk
-          curl -sSL https://github.com/vitasdk/vitasdk/releases/download/linux-v2312/vitasdk-x86_64-linux-gnu-2312.tar.bz2 -o /tmp/vitasdk.tar.bz2
           mkdir -p $VITASDK
-          tar xjf /tmp/vitasdk.tar.bz2 -C $VITASDK --strip-components=1 || {
-            # Fallback: instalar desde buildscripts si el tarball no existe
-            git clone https://github.com/vitasdk/buildscripts.git /tmp/vitasdk-buildscripts
+          # Intentar descargar tarball precompilado
+          if curl -sSL https://github.com/vitasdk/autobuilds/releases/download/master-linux-v2312/vitasdk-x86_64-linux-gnu-2312.tar.bz2 -o /tmp/vitasdk.tar.bz2; then
+            tar xjf /tmp/vitasdk.tar.bz2 -C $VITASDK --strip-components=1
+          else
+            # Fallback: usar buildscripts
+            git clone --depth 1 https://github.com/vitasdk/buildscripts.git /tmp/vitasdk-buildscripts
             cd /tmp/vitasdk-buildscripts
             export VITASDK=$VITASDK
-            ./build.sh
-          }
+            ./setup.sh
+          fi
           echo "VITASDK=$VITASDK" >> $GITHUB_ENV
           echo "$VITASDK/bin" >> $GITHUB_PATH
         
@@ -44,6 +50,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: VitaCast.vpk
+          body_path: RELEASE_NOTES.md
           draft: false
           prerelease: false
         env:
