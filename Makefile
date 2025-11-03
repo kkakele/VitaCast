@@ -6,7 +6,7 @@
 # Información de la aplicación
 TARGET = VitaCast
 TITLE_ID = VCAST001
-APP_VER = 03.03
+APP_VER = 04.00
 CONTENT_ID = UP0000-$(TITLE_ID)_00-0000000000000000
 
 # Directorios
@@ -95,6 +95,31 @@ $(TARGET).vpk: $(BUILD_DIR)/eboot.bin param.sfo | $(VPK_DIR)
 	              -a assets/icons/pause.png=assets/icons/pause.png \
 	              -a assets/icons/next.png=assets/icons/next.png \
 	              -a assets/icons/prev.png=assets/icons/prev.png \
+	              -a assets/ui/main_menu_bg.png=assets/ui/main_menu_bg.png \
+	              -a assets/ui/player_bg.png=assets/ui/player_bg.png \
+	              -a assets/ui/podcasts_bg.png=assets/ui/podcasts_bg.png \
+	              -a assets/ui/music_bg.png=assets/ui/music_bg.png \
+	              -a assets/ui/overlay.png=assets/ui/overlay.png \
+	              -a assets/thumbnails/podcast_00.png=assets/thumbnails/podcast_00.png \
+	              -a assets/thumbnails/podcast_01.png=assets/thumbnails/podcast_01.png \
+	              -a assets/thumbnails/podcast_02.png=assets/thumbnails/podcast_02.png \
+	              -a assets/thumbnails/podcast_03.png=assets/thumbnails/podcast_03.png \
+	              -a assets/thumbnails/podcast_04.png=assets/thumbnails/podcast_04.png \
+	              -a assets/thumbnails/podcast_05.png=assets/thumbnails/podcast_05.png \
+	              -a assets/thumbnails/podcast_06.png=assets/thumbnails/podcast_06.png \
+	              -a assets/thumbnails/podcast_07.png=assets/thumbnails/podcast_07.png \
+	              -a assets/thumbnails/podcast_08.png=assets/thumbnails/podcast_08.png \
+	              -a assets/thumbnails/podcast_09.png=assets/thumbnails/podcast_09.png \
+	              -a assets/thumbnails/music_00.png=assets/thumbnails/music_00.png \
+	              -a assets/thumbnails/music_01.png=assets/thumbnails/music_01.png \
+	              -a assets/thumbnails/music_02.png=assets/thumbnails/music_02.png \
+	              -a assets/thumbnails/music_03.png=assets/thumbnails/music_03.png \
+	              -a assets/thumbnails/music_04.png=assets/thumbnails/music_04.png \
+	              -a assets/thumbnails/music_05.png=assets/thumbnails/music_05.png \
+	              -a assets/thumbnails/music_06.png=assets/thumbnails/music_06.png \
+	              -a assets/thumbnails/music_07.png=assets/thumbnails/music_07.png \
+	              -a assets/thumbnails/music_08.png=assets/thumbnails/music_08.png \
+	              -a assets/thumbnails/music_09.png=assets/thumbnails/music_09.png \
 	              $(TARGET).vpk
 	@echo ""
 	@echo "✅ VPK creado: $(TARGET).vpk"
