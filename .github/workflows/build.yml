@@ -15,14 +15,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Install vita2d
+      - name: Install vita2d and dependencies
         run: |
           export PATH=$VITASDK/bin:$PATH
-          $VITASDK/bin/vdpm vita2d || echo "vita2d puede estar ya instalado"
+          # Intentar instalar vita2d con vdpm
+          $VITASDK/bin/vdpm vita2d 2>&1 || echo "vita2d instalaci?n fall?, puede estar ya instalado"
+          # Verificar que las bibliotecas existen
+          echo "Bibliotecas disponibles:"
+          ls -la $VITASDK/arm-vita-eabi/lib/libvita2d* 2>&1 || echo "libvita2d no encontrada"
+          ls -la $VITASDK/arm-vita-eabi/lib/*SceDisplay* 2>&1 | head -3 || echo "SceDisplay stub no encontrada"
+          ls -la $VITASDK/arm-vita-eabi/lib/*SceGxm* 2>&1 | head -3 || echo "SceGxm stub no encontrada"
           
       - name: Build VitaCast
         run: |
           export PATH=$VITASDK/bin:$PATH
+          # Verificar que vita2d est? disponible
+          pkg-config --exists vita2d && echo "vita2d encontrado via pkg-config" || echo "vita2d no encontrado en pkg-config"
           make release
           
       - name: Upload VPK
