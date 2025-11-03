@@ -49,7 +49,9 @@ SOURCES = main.c \
 OBJECTS = $(SOURCES:%.c=$(BUILD_DIR)/%.o)
 
 # Bibliotecas del sistema (orden importante para el linker)
-LIBS = -lvita2d \
+# vita2d necesita SceFont_stub para fuentes, y debe estar antes de vita2d
+LIBS = -lSceFont_stub \
+       -lvita2d \
        -lSceGxm_stub \
        -lSceGpuEs4_stub \
        -lSceShaccCgExt \
