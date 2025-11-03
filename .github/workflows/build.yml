@@ -25,6 +25,7 @@ jobs:
           ls -la $VITASDK/arm-vita-eabi/lib/libvita2d* 2>&1 || echo "libvita2d no encontrada"
           ls -la $VITASDK/arm-vita-eabi/lib/*SceDisplay* 2>&1 | head -3 || echo "SceDisplay stub no encontrada"
           ls -la $VITASDK/arm-vita-eabi/lib/*SceGxm* 2>&1 | head -3 || echo "SceGxm stub no encontrada"
+          ls -la $VITASDK/arm-vita-eabi/lib/*SceFont* 2>&1 | head -3 || echo "SceFont stub no encontrada"
           
       - name: Build VitaCast
         run: |
