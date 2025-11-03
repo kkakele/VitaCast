@@ -2,6 +2,7 @@
 #include <psp2/kernel/processmgr.h>
 #include <psp2/display.h>
 #include <psp2/types.h>
+#include <psp2/sysmodule.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,8 +47,15 @@ static vitacast_app_t* app = NULL;
 // ============================================================================
 
 static int vitacast_init(void) {
-    // Inicializar vita2d
-    vita2d_init();
+    // Cargar módulos del sistema necesarios
+    // PGF es necesario para las fuentes de vita2d
+    sceSysmoduleLoadModule(SCE_SYSMODULE_PGF);
+    
+    // Inicializar vita2d (esto inicializa GXM internamente)
+    if (vita2d_init() < 0) {
+        printf("ERROR: No se pudo inicializar vita2d\n");
+        return -1;
+    }
     vita2d_set_clear_color(RGBA8(26, 26, 46, 255)); // Fondo oscuro estilo PS Vita
     
     // Inicializar control
