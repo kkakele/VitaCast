@@ -16,7 +16,7 @@
 #include "apple/apple_sync.h"
 
 #define APP_TITLE "VitaCast"
-#define APP_VERSION "3.0.0"
+#define APP_VERSION "3.0.3"
 #define FRAME_DELAY 16666 // ~60 FPS en microsegundos
 
 // Estructura principal de la aplicación
