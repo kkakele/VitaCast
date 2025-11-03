@@ -1,61 +1,64 @@
-# VitaCast v3.0.0 - Release Definitiva
+# VitaCast v3.0.3 - Release Notes
 
-## 🎉 Nueva Versión
+## 🎉 Nueva Versión - Corrección de Errores y Mejoras
 
-Esta es la versión definitiva de VitaCast, completamente reconstruida desde cero siguiendo los estándares homebrew de PlayStation Vita.
-
-## ✨ Características
-
-### 🎵 Reproductor de Audio
-- Soporte para múltiples formatos: MP3, AAC, OGG, WAV, M4A
-- Control de volumen y navegación por pistas
-- Barra de progreso en tiempo real
-
-### 🍎 Integración con Apple
-- Apple Music: Acceso a biblioteca de música
-- Apple Podcasts: Sincronización con podcasts suscritos
-- iCloud: Sincronización de configuraciones
-
-### 🔍 Búsqueda y Descarga
-- Búsqueda de podcasts usando la API de iTunes
-- Descarga automática de episodios para escucha offline
-- Gestión de caché inteligente
-
-### 🎨 Interfaz de Usuario
-- Diseño inspirado en la aplicación oficial de música de PS Vita
-- Navegación intuitiva con gamepad
-- Portadas de podcasts descargadas automáticamente
-
-## 🔧 Mejoras Técnicas
-
-- Código completamente refactorizado siguiendo estándares homebrew
-- Makefile profesional y optimizado
-- Mejor gestión de memoria
-- Código más modular y mantenible
-
-## 📦 Instalación
-
-1. Descarga `VitaCast.vpk`
-2. Transfiere a tu PS Vita usando VitaShell
-3. Navega al archivo VPK y presiona X para instalar
-
-## ⚙️ Requisitos
-
-- PlayStation Vita con firmware 3.60+
-- HENkaku/Enso instalado
-- Almacenamiento: Mínimo 100MB para caché
-- Red WiFi para funcionalidades online
+Esta versión corrige el error crítico **0xFFFFFFFF** y aumenta significativamente el tamaño del VPK con recursos gráficos adicionales.
 
 ## 🐛 Correcciones
 
-- Mejor manejo de errores
-- Optimizaciones de rendimiento
-- Corrección de problemas de memoria
+### Error 0xFFFFFFFF
+- **Problema**: La aplicación fallaba al iniciar con error 0xFFFFFFFF
+- **Solución**: Se añadió la carga del módulo `SCE_SYSMODULE_PGF` antes de inicializar `vita2d`
+- **Detalles**: El módulo PGF (Portable Graphics Font) es necesario para las fuentes que usa vita2d. Sin este módulo, la inicialización de gráficos fallaba.
+
+## 📦 Mejoras en Recursos
+
+### Nuevos Assets Gráficos
+- **Iconos de controles**: Se añadieron iconos para play, pause, next y prev
+- **Fondo de aplicación**: Se incluyó `background.png` como recurso adicional
+- **Tamaño del VPK**: Aumentó de ~116KB a ~340KB para incluir todos los recursos
+
+### Recursos Incluidos
+```
+assets/
+├── background.png      (~100KB)
+└── icons/
+    ├── play.png        (~25KB)
+    ├── pause.png       (~25KB)
+    ├── next.png        (~25KB)
+    └── prev.png        (~25KB)
+```
+
+## 🔧 Cambios Técnicos
+
+- **Versión**: 3.0.0 → 3.0.3
+- **Makefile**: Actualizado para incluir todos los assets en el VPK
+- **Inicialización**: Verificación de retorno de `vita2d_init()` y carga correcta de módulos
+
+## 📋 Instalación
+
+1. Descarga `VitaCast.vpk` desde la sección de releases
+2. Transfiere el VPK a tu PS Vita usando VitaShell o FTP
+3. Abre el VPK con VitaShell y presiona X para instalar
+4. ¡Disfruta de VitaCast sin errores!
+
+## ⚠️ Requisitos
+
+- **Firmware**: PS Vita con firmware 3.60+ (recomendado 3.65+)
+- **Homebrew**: HENkaku/Enso instalado
+- **Almacenamiento**: ~1MB para la instalación
+
+## 🎮 Uso
+
+Una vez instalado:
+- La aplicación debería iniciar sin errores
+- Los recursos gráficos están disponibles para uso futuro
+- La interfaz gráfica funciona correctamente con vita2d
 
 ## 🙏 Agradecimientos
 
-Gracias a toda la comunidad de homebrew de PS Vita por el soporte continuo.
+Gracias por reportar el error y ayudarnos a mejorar VitaCast. Esta versión debería resolver completamente el problema de inicialización.
 
 ---
 
-**VitaCast v3.0.0** - La mejor experiencia de podcast y música en PlayStation Vita
+**VitaCast v3.0.3** - Corrección de errores y mejoras de recursos
