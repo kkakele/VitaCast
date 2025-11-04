@@ -6,7 +6,7 @@
 # Información de la aplicación
 TARGET = VitaCast
 TITLE_ID = VCAST001
-APP_VER = 04.01
+APP_VER = 04.02
 CONTENT_ID = UP0000-$(TITLE_ID)_00-0000000000000000
 
 # Directorios
