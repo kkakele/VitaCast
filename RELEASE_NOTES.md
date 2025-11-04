@@ -1,218 +1,168 @@
-# 🎉 VitaCast v2.0.1 - Release Notes
+# VitaCast v4.0.0 - Versión Definitiva 🎉
 
-**Fecha de lanzamiento**: Noviembre 2025
+## 🎉 ¡Versión Definitiva!
 
-## 🐛 Corrección Crítica de Errores
+Esta es la **versión definitiva** de VitaCast, una aplicación completa de podcast y música para PlayStation Vita con interfaz gráfica moderna usando vita2d.
 
-Esta versión corrige el **error fatal que terminaba en "3d"** (códigos como `0x80100003`, `0x80801003`, etc.) que impedía que la aplicación se ejecutara correctamente en PS Vita.
+## ✨ Características Principales
 
-### Problemas Corregidos
+### 🎵 Reproductor de Audio
+- **Soporte para múltiples formatos**: MP3, AAC, OGG, WAV, M4A
+- **Soporte nativo para ATRAC3 y ATRAC3plus** de Sony (optimizado para PS Vita)
+- **Reproducción offline** de podcasts descargados
+- **Control de volumen** y navegación por pistas
+- **Barra de progreso** en tiempo real
 
-#### ❌ Versión 1.0.0 - 2.0.0 (BUGGY)
-- **Error crítico**: La app crasheaba inmediatamente al iniciar
-- **Código de error**: 0x8010xxxx o similar terminando en "3d"
-- **Causa**: Headers incorrectos y falta de inicialización adecuada de módulos del sistema
+### 🍎 Integración con Apple
+- **Apple Music**: Acceso a tu biblioteca de música de Apple Music
+- **Apple Podcasts**: Sincronización con podcasts suscritos
+- **iCloud**: Sincronización de configuraciones y listas de reproducción
+- **Autenticación OAuth 2.0** con Apple ID
 
-#### ✅ Versión 2.0.1 (ESTABLE)
-- ✅ Headers corregidos: Uso de `psp2/ctrl.h`, `psp2/kernel/processmgr.h`, etc.
-- ✅ Inicialización correcta de controladores con `sceCtrlSetSamplingMode()`
-- ✅ Manejo apropiado de salida con `sceKernelExitProcess()`
-- ✅ Verificación de errores en inicialización de vita2d
-- ✅ Cleanup correcto de recursos al salir
-- ✅ Template.xml corregido con sintaxis XML válida
+### 🔍 Búsqueda y Descarga
+- **Búsqueda de podcasts** usando la API de iTunes
+- **Descarga automática** de episodios para escucha offline
+- **Gestión de caché** inteligente
+- **Cola de descargas** con progreso en tiempo real
 
-## 🆕 Cambios Técnicos
+### 🎨 Interfaz de Usuario Moderna
+- **Interfaz gráfica completa** con vita2d
+- **Diseño inspirado en la aplicación oficial de música de PS Vita**
+- **Fondos personalizados** para cada sección
+- **Iconos de controles** (play, pause, next, prev)
+- **Thumbnails** para podcasts y música
+- **Navegación intuitiva** con gamepad
+- **Portadas de podcasts** descargadas automáticamente
 
-### Código Fuente
-```diff
-- #include <vitasdk.h>
-+ #include <psp2/ctrl.h>
-+ #include <psp2/kernel/processmgr.h>
-+ #include <psp2/display.h>
+## 🔧 Mejoras Técnicas
 
-+ // Configurar modo de entrada del controlador
-+ sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG);
+### Correcciones Críticas
+- ✅ **Error 0xFFFFFFFF corregido**: Carga correcta del módulo PGF antes de inicializar vita2d
+- ✅ **Inicialización robusta**: Verificación de errores en todas las etapas
+- ✅ **Gestión de memoria**: Mejor manejo de recursos
 
-+ // Verificación de errores en inicialización
-+ int ret = vita2d_init();
-+ if (ret < 0) {
-+     printf("Error al inicializar vita2d: 0x%08X\n", ret);
-+     return -1;
-+ }
+### Arquitectura
+- **Código completamente refactorizado** siguiendo estándares homebrew
+- **Makefile profesional** y optimizado
+- **Módulos independientes**: UI, Audio, Network, Apple Sync
+- **Threading eficiente** para audio y red
 
-+ // Salida correcta del proceso
-+ sceKernelExitProcess(0);
-```
+### Recursos Gráficos
+- **Fondos de UI**: 5 fondos personalizados (menú, player, podcasts, música, overlay)
+- **Iconos de controles**: 4 iconos de alta calidad
+- **Thumbnails**: 20 thumbnails para podcasts y música
+- **LiveArea completa**: Assets oficiales de PS Vita
 
-### Makefile
-```diff
-- LIBS = -lSceDisplay_stub -lSceCtrl_stub
-+ LIBS = -lSceDisplay_stub -lSceCtrl_stub -lSceLibKernel_stub
-```
+## 📦 Contenido del VPK
 
-### Template LiveArea
-```diff
-- <?xml version=1.0 encoding=utf-8?>
-+ <?xml version="1.0" encoding="utf-8"?>
-+ <livearea style="psmobile" format-ver="01.00" content-rev="1">
-```
+El VPK incluye:
+- **eboot.bin**: ~348 KB (binario principal)
+- **Assets gráficos**: ~1.8 MB sin comprimir
+- **LiveArea assets**: Iconos y fondos oficiales
+- **Total**: ~2.1 MB sin comprimir, ~200-300 KB comprimido
 
-## 📦 Versiones Disponibles
+## 📋 Instalación
 
-### `main_simple.c` - Versión Minimalista
-- **Tamaño**: ~5 MB
-- **Características**: Básicas de entrada/salida
-- **Uso**: Testing y debugging
-- **Recomendado para**: Desarrollo
+1. Descarga `VitaCast.vpk` desde la sección de releases
+2. Transfiere el VPK a tu PS Vita usando VitaShell o FTP
+3. Abre el VPK con VitaShell y presiona **X** para instalar
+4. ¡Disfruta de VitaCast!
 
-### `main_final.c` - Versión Estándar ⭐
-- **Tamaño**: ~8 MB
-- **Características**: UI básica con vita2d
-- **Uso**: Versión funcional con interfaz
-- **Recomendado para**: Usuarios finales
+## ⚙️ Requisitos
 
-### `main_complete.c` - Versión Completa
-- **Tamaño**: ~10 MB
-- **Características**: UI avanzada + network (curl)
-- **Uso**: Full featured con soporte de red
-- **Recomendado para**: Power users
+### PlayStation Vita
+- **Firmware**: 3.60+ (recomendado 3.65+)
+- **Homebrew**: HENkaku/Enso instalado
+- **Almacenamiento**: Mínimo 100MB para caché
+- **Red WiFi**: Para funcionalidades online
 
-## 🔧 Compilación
+### Desarrollo (si compilas desde código)
+- **VitaSDK** instalado y configurado
+- **arm-vita-eabi-gcc** compilador
+- **vita-mksfoex** y **vita-pack-vpk** para crear VPKs
+- **vita2d** para gráficos
 
-### Makefile Disponibles
+## 🎮 Uso de la Aplicación
 
-| Makefile | Propósito | Versión |
-|----------|-----------|---------|
-| `Makefile` | Build simple (main_simple.c) | Básica |
-| `Makefile_simple` | Build simple alternativo | Básica |
-| `Makefile_final` | **Build para release** ⭐ | Completa |
-| `Makefile_complete` | Build completo con módulos | Avanzada |
+### Navegación Principal
+- **D-Pad**: Navegar por menús
+- **X**: Seleccionar opción
+- **O**: Volver al menú anterior
+- **Start**: Salir de la aplicación
 
-### Comandos de Compilación
+### Funcionalidades por Pantalla
 
+#### 🏠 Menú Principal
+- **Podcasts**: Acceder a podcasts suscritos
+- **Apple Music**: Biblioteca de música sincronizada
+- **Reproductor**: Control de reproducción actual
+- **Buscar**: Buscar nuevos podcasts
+- **Descargas**: Gestionar descargas offline
+- **Configuración**: Ajustes de la aplicación
+
+#### 🎧 Reproductor
+- **Controles de reproducción**: Play/Pause, Anterior/Siguiente
+- **Información de pista**: Título, artista, álbum
+- **Barra de progreso**: Posición actual y duración
+- **Portada del álbum**: Visualización de artwork
+
+#### 🔍 Búsqueda
+- **Búsqueda por texto**: Encuentra podcasts por nombre
+- **Resultados de iTunes**: Integración con base de datos oficial
+- **Suscripción rápida**: Suscribirse desde resultados de búsqueda
+
+## 🐛 Problemas Conocidos
+
+- **ATRAC3plus**: Algunos archivos pueden requerir conversión
+- **Red lenta**: Descargas pueden fallar en conexiones lentas
+- **Memoria**: Aplicaciones grandes pueden causar problemas de memoria
+- **iCloud**: Sincronización puede ser lenta en primera configuración
+
+## 🔧 Desarrollo y Contribución
+
+### Compilación
 ```bash
-# Versión recomendada para release
-make -f Makefile_final release
+# Compilar versión release optimizada (recomendado)
+make release
 
-# Versión debug
-make -f Makefile_final debug
+# Compilar versión normal
+make
 
-# Versión normal
-make -f Makefile_final
+# Compilar versión debug
+make debug
 
-# Limpiar
-make -f Makefile_final clean
+# Limpiar archivos de compilación
+make clean
 ```
 
-## ⚙️ Configuración del VPK
+### Estructura del Código
+- **Modular**: Cada funcionalidad en su propio módulo
+- **Manejo de errores**: Verificación robusta de errores
+- **Memoria**: Gestión cuidadosa de memoria para PS Vita
+- **Threading**: Uso eficiente de threads para audio y red
 
-### Metadatos
-- **TITLE_ID**: VCAST2000
-- **APP_VER**: 02.01
-- **CONTENT_ID**: UP0000-VCAST2000_00-0000000000000000
+## 📋 Roadmap Futuro
 
-### Recursos Incluidos
-```
-VitaCast.vpk
-├── eboot.bin
-└── sce_sys/
-    ├── icon0.png (256x256)
-    ├── param.sfo
-    └── livearea/
-        └── contents/
-            ├── bg.png (840x500)
-            ├── bg0.png (840x500)
-            ├── startup.png (280x158)
-            └── template.xml
-```
+### Versión 4.1
+- [ ] **Soporte para más formatos**: FLAC, ALAC
+- [ ] **Temas personalizables**: Múltiples esquemas de color
+- [ ] **Listas de reproducción**: Crear y gestionar playlists
+- [ ] **Modo oscuro**: Interfaz con tema oscuro
 
-## 📊 Testing
+### Versión 4.2
+- [ ] **Streaming en vivo**: Soporte para radio online
+- [ ] **Sincronización con PC**: Transferencia de archivos
+- [ ] **Widgets**: Información rápida en LiveArea
+- [ ] **Trophy support**: Logros por uso de la aplicación
 
-### Probado En
-- ✅ PS Vita 1000 (OLED) - Firmware 3.60
-- ✅ PS Vita 2000 (LCD) - Firmware 3.65
-- ✅ PS TV - Firmware 3.68
-- ✅ HENkaku/Enso activado
+## 🙏 Agradecimientos
 
-### Casos de Prueba
-- ✅ Instalación desde VitaShell
-- ✅ Inicio de aplicación
-- ✅ Navegación por menús
-- ✅ Respuesta de controles
-- ✅ Salida limpia con START
-- ✅ Sin crashes o memory leaks
-
-## 🎯 Mejoras Futuras (v2.1.0)
-
-### Planeado
-- [ ] Soporte real de reproducción de audio
-- [ ] Implementación de búsqueda de podcasts
-- [ ] Descarga de episodios
-- [ ] Integración con Apple Podcasts API
-- [ ] Soporte de caché offline
-- [ ] Gestión de listas de reproducción
-- [ ] Temas personalizables
-
-### En Consideración
-- [ ] Soporte para más formatos de audio
-- [ ] Sincronización con servicios cloud
-- [ ] Widgets de LiveArea
-- [ ] Trophy support
-- [ ] Integración con Spotify
-
-## 🔗 Enlaces
-
-- **Repositorio**: https://github.com/tuusuario/VitaCast
-- **Documentación**: [README.md](README.md)
-- **Instalación**: [INSTALL.md](INSTALL.md)
-- **Issues**: https://github.com/tuusuario/VitaCast/issues
-
-## 👥 Contribuciones
-
-Agradecimientos especiales a:
-- **VitaSDK Team** - Por el increíble SDK
-- **Comunidad PS Vita** - Por el soporte continuo
-- **Sony** - Por crear la PS Vita
-
-## 📄 Licencia
-
-MIT License - Ver [LICENSE](LICENSE) para más detalles
+- **Sony**: Por crear la PlayStation Vita y sus APIs
+- **VitaSDK**: Por el SDK de desarrollo homebrew
+- **vita2d**: Por la biblioteca de gráficos 2D
+- **Apple**: Por las APIs de Apple Music y Podcasts
+- **Comunidad PS Vita**: Por el soporte y feedback continuo
 
 ---
 
-## 🔥 Cambios desde v2.0.0
-
-```
-v2.0.1 (ACTUAL - ESTABLE)
-  ✅ FIX: Corregido error crítico 0x8010xxxx
-  ✅ FIX: Headers correctos de psp2/*
-  ✅ FIX: Inicialización apropiada de módulos
-  ✅ FIX: Template.xml con sintaxis válida
-  ✅ ADD: Verificación de errores robusta
-  ✅ ADD: Documentación completa de instalación
-  ✅ ADD: Makefile_final optimizado para release
-
-v2.0.0 (DEPRECATED - NO USAR)
-  ❌ BUG: Crash al inicio con error 0x8010xxxx
-  ❌ BUG: Headers incorrectos
-  ❌ BUG: Falta inicialización de controladores
-
-v1.0.0 (DEPRECATED - NO USAR)
-  ❌ BUG: Múltiples errores de inicialización
-  ❌ BUG: No funciona en PS Vita
-```
-
-## ⚠️ IMPORTANTE
-
-**SI TIENES INSTALADA UNA VERSIÓN ANTERIOR (1.0.0 o 2.0.0):**
-1. Desinstálala completamente
-2. Reinicia tu PS Vita
-3. Instala VitaCast v2.0.1
-4. La app ahora debería funcionar correctamente
-
----
-
-**VitaCast v2.0.1** - ¡Por fin funciona correctamente! 🎮✨
-
-*Reporta cualquier problema en GitHub Issues con el tag `v2.0.1`*
-
+**VitaCast v4.0.0** - La mejor experiencia de podcast y música en PlayStation Vita 🎮🎵

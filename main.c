@@ -1,11 +1,14 @@
-﻿#include <psp2/ctrl.h>
+#include <psp2/ctrl.h>
 #include <psp2/kernel/processmgr.h>
+#include <psp2/kernel/threadmgr.h>
 #include <psp2/display.h>
 #include <psp2/types.h>
+#include <psp2/sysmodule.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <vita2d.h>
 
 #include "ui/ui_manager.h"
 #include "audio/audio_player.h"
@@ -14,7 +17,7 @@
 #include "apple/apple_sync.h"
 
 #define APP_TITLE "VitaCast"
-#define APP_VERSION "2.0.1"
+#define APP_VERSION "4.0.2"
 #define FRAME_DELAY 16666 // ~60 FPS en microsegundos
 
 // Estructura principal de la aplicación
@@ -45,10 +48,30 @@ static vitacast_app_t* app = NULL;
 // ============================================================================
 
 static int vitacast_init(void) {
-    // Inicializar control
+    // Cargar módulos del sistema necesarios ANTES de inicializar vita2d
+    // El orden es crítico: primero los módulos base, luego los específicos
+    int ret;
+    
+    // Cargar módulo de red (necesario para algunas funcionalidades)
+    ret = sceSysmoduleLoadModule(SCE_SYSMODULE_NET);
+    if (ret < 0 && ret != 0x80020111) { // 0x80020111 = ya cargado
+        printf("ADVERTENCIA: No se pudo cargar módulo NET: 0x%08X\n", ret);
+    }
+    
+    // Cargar módulo PGF (crítico para fuentes de vita2d)
+    ret = sceSysmoduleLoadModule(SCE_SYSMODULE_PGF);
+    if (ret < 0 && ret != 0x80020111) {
+        printf("ERROR: No se pudo cargar módulo PGF: 0x%08X\n", ret);
+        return -1;
+    }
+    
+    // Esperar un poco para que los módulos se inicialicen completamente
+    sceKernelDelayThread(100000); // 100ms
+    
+    // Inicializar control PRIMERO (antes de vita2d)
     sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG);
     
-    // Crear estructura de la app
+    // Crear estructura de la app ANTES de vita2d
     app = (vitacast_app_t*)malloc(sizeof(vitacast_app_t));
     if (!app) {
         printf("ERROR: No se pudo asignar memoria para la aplicación\n");
@@ -61,7 +84,30 @@ static int vitacast_init(void) {
     app->frame_counter = 0;
     app->demo_mode = false;
     
-    // Inicializar UI Manager
+    // Inicializar vita2d (esto inicializa GXM internamente)
+    // IMPORTANTE: No llamar a vita2d_load_default_pgf hasta DESPUÉS de vita2d_init
+    ret = vita2d_init();
+    if (ret < 0) {
+        printf("ERROR: No se pudo inicializar vita2d: %d (0x%08X)\n", ret, ret);
+        printf("ERROR: Verifica que los módulos PGF y GXM estén disponibles\n");
+        free(app);
+        return -1;
+    }
+    
+    // Configurar color de fondo después de inicializar
+    vita2d_set_clear_color(RGBA8(26, 26, 46, 255)); // Fondo oscuro estilo PS Vita
+    
+    // Hacer un render inicial para asegurar que vita2d esté completamente listo
+    // Esto fuerza la inicialización completa de GXM y Display
+    vita2d_start_drawing();
+    vita2d_clear_screen();
+    vita2d_end_drawing();
+    vita2d_swap_buffers();
+    
+    // Esperar un vblank adicional para estabilizar
+    sceKernelDelayThread(16666); // ~1 frame a 60fps
+    
+    // AHORA sí podemos inicializar UI Manager (que carga la fuente)
     printf("Inicializando UI Manager...\n");
     app->ui = ui_manager_create();
     if (!app->ui) {
@@ -146,6 +192,9 @@ static void vitacast_cleanup(void) {
     
     free(app);
     app = NULL;
+    
+    // Finalizar vita2d
+    vita2d_fini();
     
     printf("VitaCast cerrado correctamente\n");
     sceKernelDelayThread(1000000); // Esperar 1 segundo
@@ -234,66 +283,19 @@ static void vitacast_update(void) {
 // ============================================================================
 
 static void vitacast_clear_screen(void) {
-    printf("\033[2J\033[H"); // ANSI escape codes para limpiar pantalla
+    vita2d_start_drawing();
+    vita2d_clear_screen();
 }
 
-static void vitacast_render_status_bar(void) {
-    printf("─────────────────────────────────────────────────────────────\n");
-    
-    // Estado de red
-    if (app->network) {
-        if (network_manager_is_connected(app->network)) {
-            printf("📡 WiFi: Connected");
-        } else {
-            printf("📡 WiFi: Disconnected");
-        }
-    }
-    
-    printf("  |  ");
-    
-    // Estado de Apple
-    if (app->apple) {
-        if (apple_sync_is_signed_in(app->apple)) {
-            printf("🍎 Apple: %s", apple_sync_get_user_email(app->apple));
-        } else {
-            printf("🍎 Apple: Not signed in");
-        }
-    }
-    
-    printf("  |  ");
-    
-    // Estado de audio
-    if (app->audio) {
-        audio_state_t state = audio_player_get_state(app->audio);
-        if (state == AUDIO_STATE_PLAYING) {
-            printf("▶️  Playing");
-        } else if (state == AUDIO_STATE_PAUSED) {
-            printf("⏸️  Paused");
-        } else {
-            printf("⏹️  Stopped");
-        }
-        printf(" | Vol: %d%%", audio_player_get_volume(app->audio));
-    }
-    
-    printf("\n─────────────────────────────────────────────────────────────\n");
-}
+// Función eliminada - ahora se renderiza gráficamente en la UI
 
 static void vitacast_render(void) {
     if (!app || !app->ui) return;
     
-    // Limpiar pantalla
+    // Limpiar pantalla y comenzar frame
     vitacast_clear_screen();
     
-    // Título
-    printf("\n");
-    printf("╔═════════════════════════════════════════════════════════════╗\n");
-    printf("║         VitaCast v%s - Podcast & Music Player          ║\n", APP_VERSION);
-    printf("╚═════════════════════════════════════════════════════════════╝\n");
-    
-    // Barra de estado
-    vitacast_render_status_bar();
-    
-    // Renderizar pantalla según estado actual
+    // Renderizar UI según estado actual
     switch (app->current_state) {
         case APP_STATE_MAIN_MENU:
             ui_manager_render_main_menu(app->ui);
@@ -324,21 +326,12 @@ static void vitacast_render(void) {
             break;
             
         default:
-            printf("Estado desconocido\n");
             break;
     }
     
-    // Controles generales
-    printf("\n");
-    printf("─────────────────────────────────────────────────────────────\n");
-    printf("  L/R: Volume  |  SELECT: Demo Mode  |  START: Exit\n");
-    printf("─────────────────────────────────────────────────────────────\n");
-    
-    if (app->demo_mode) {
-        printf("  [DEMO MODE] - Navegación automática activa\n");
-    }
-    
-    printf("\n  Frame: %d\n", app->frame_counter);
+    // Finalizar frame y mostrar
+    vita2d_end_drawing();
+    vita2d_swap_buffers();
 }
 
 // ============================================================================
