@@ -1,5 +1,6 @@
 #include <psp2/ctrl.h>
 #include <psp2/kernel/processmgr.h>
+#include <psp2/kernel/threadmgr.h>
 #include <psp2/display.h>
 #include <psp2/types.h>
 #include <psp2/sysmodule.h>
@@ -16,7 +17,7 @@
 #include "apple/apple_sync.h"
 
 #define APP_TITLE "VitaCast"
-#define APP_VERSION "4.0.0"
+#define APP_VERSION "4.0.1"
 #define FRAME_DELAY 16666 // ~60 FPS en microsegundos
 
 // Estructura principal de la aplicación
@@ -47,13 +48,31 @@ static vitacast_app_t* app = NULL;
 // ============================================================================
 
 static int vitacast_init(void) {
-    // Cargar módulos del sistema necesarios
-    // PGF es necesario para las fuentes de vita2d
-    sceSysmoduleLoadModule(SCE_SYSMODULE_PGF);
+    // Cargar módulos del sistema necesarios ANTES de inicializar vita2d
+    // El orden es crítico: primero los módulos base, luego los específicos
+    int ret;
+    
+    // Cargar módulo de red (necesario para algunas funcionalidades)
+    ret = sceSysmoduleLoadModule(SCE_SYSMODULE_NET);
+    if (ret < 0 && ret != 0x80020111) { // 0x80020111 = ya cargado
+        printf("ADVERTENCIA: No se pudo cargar módulo NET: 0x%08X\n", ret);
+    }
+    
+    // Cargar módulo PGF (crítico para fuentes de vita2d)
+    ret = sceSysmoduleLoadModule(SCE_SYSMODULE_PGF);
+    if (ret < 0 && ret != 0x80020111) {
+        printf("ERROR: No se pudo cargar módulo PGF: 0x%08X\n", ret);
+        return -1;
+    }
+    
+    // Esperar un poco para que los módulos se inicialicen completamente
+    sceKernelDelayThread(100000); // 100ms
     
     // Inicializar vita2d (esto inicializa GXM internamente)
-    if (vita2d_init() < 0) {
-        printf("ERROR: No se pudo inicializar vita2d\n");
+    ret = vita2d_init();
+    if (ret < 0) {
+        printf("ERROR: No se pudo inicializar vita2d: %d\n", ret);
+        printf("ERROR: Esto puede deberse a módulos del sistema no cargados\n");
         return -1;
     }
     vita2d_set_clear_color(RGBA8(26, 26, 46, 255)); // Fondo oscuro estilo PS Vita

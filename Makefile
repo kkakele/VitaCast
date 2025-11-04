@@ -6,7 +6,7 @@
 # Información de la aplicación
 TARGET = VitaCast
 TITLE_ID = VCAST001
-APP_VER = 04.00
+APP_VER = 04.01
 CONTENT_ID = UP0000-$(TITLE_ID)_00-0000000000000000
 
 # Directorios
@@ -120,6 +120,15 @@ $(TARGET).vpk: $(BUILD_DIR)/eboot.bin param.sfo | $(VPK_DIR)
 	              -a assets/thumbnails/music_07.png=assets/thumbnails/music_07.png \
 	              -a assets/thumbnails/music_08.png=assets/thumbnails/music_08.png \
 	              -a assets/thumbnails/music_09.png=assets/thumbnails/music_09.png \
+	              -a assets/wallpapers/wallpaper_01.png=assets/wallpapers/wallpaper_01.png \
+	              -a assets/wallpapers/wallpaper_02.png=assets/wallpapers/wallpaper_02.png \
+	              -a assets/wallpapers/wallpaper_03.png=assets/wallpapers/wallpaper_03.png \
+	              -a assets/sounds/notification.wav=assets/sounds/notification.wav \
+	              -a assets/sounds/click.wav=assets/sounds/click.wav \
+	              -a assets/sounds/error.wav=assets/sounds/error.wav \
+	              -a assets/data/podcasts_db.json=assets/data/podcasts_db.json \
+	              -a assets/data/music_db.json=assets/data/music_db.json \
+	              -a assets/data/settings.json=assets/data/settings.json \
 	              $(TARGET).vpk
 	@echo ""
 	@echo "✅ VPK creado: $(TARGET).vpk"
