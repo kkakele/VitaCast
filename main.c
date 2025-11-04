@@ -68,23 +68,13 @@ static int vitacast_init(void) {
     // Esperar un poco para que los módulos se inicialicen completamente
     sceKernelDelayThread(100000); // 100ms
     
-    // Inicializar vita2d (esto inicializa GXM internamente)
-    ret = vita2d_init();
-    if (ret < 0) {
-        printf("ERROR: No se pudo inicializar vita2d: %d\n", ret);
-        printf("ERROR: Esto puede deberse a módulos del sistema no cargados\n");
-        return -1;
-    }
-    vita2d_set_clear_color(RGBA8(26, 26, 46, 255)); // Fondo oscuro estilo PS Vita
-    
-    // Inicializar control
+    // Inicializar control PRIMERO (antes de vita2d)
     sceCtrlSetSamplingMode(SCE_CTRL_MODE_ANALOG);
     
-    // Crear estructura de la app
+    // Crear estructura de la app ANTES de vita2d
     app = (vitacast_app_t*)malloc(sizeof(vitacast_app_t));
     if (!app) {
         printf("ERROR: No se pudo asignar memoria para la aplicación\n");
-        vita2d_fini();
         return -1;
     }
     
@@ -94,7 +84,30 @@ static int vitacast_init(void) {
     app->frame_counter = 0;
     app->demo_mode = false;
     
-    // Inicializar UI Manager
+    // Inicializar vita2d (esto inicializa GXM internamente)
+    // IMPORTANTE: No llamar a vita2d_load_default_pgf hasta DESPUÉS de vita2d_init
+    ret = vita2d_init();
+    if (ret < 0) {
+        printf("ERROR: No se pudo inicializar vita2d: %d (0x%08X)\n", ret, ret);
+        printf("ERROR: Verifica que los módulos PGF y GXM estén disponibles\n");
+        free(app);
+        return -1;
+    }
+    
+    // Configurar color de fondo después de inicializar
+    vita2d_set_clear_color(RGBA8(26, 26, 46, 255)); // Fondo oscuro estilo PS Vita
+    
+    // Hacer un render inicial para asegurar que vita2d esté completamente listo
+    // Esto fuerza la inicialización completa de GXM y Display
+    vita2d_start_drawing();
+    vita2d_clear_screen();
+    vita2d_end_drawing();
+    vita2d_swap_buffers();
+    
+    // Esperar un vblank adicional para estabilizar
+    sceKernelDelayThread(16666); // ~1 frame a 60fps
+    
+    // AHORA sí podemos inicializar UI Manager (que carga la fuente)
     printf("Inicializando UI Manager...\n");
     app->ui = ui_manager_create();
     if (!app->ui) {

@@ -27,7 +27,14 @@ ui_manager_t* ui_manager_create(void) {
     m->selected_item = 0;
     
     // Cargar fuente del sistema
+    // IMPORTANTE: vita2d_init() debe haber sido llamado ANTES de esto
     m->font = vita2d_load_default_pgf();
+    if (!m->font) {
+        printf("ERROR: No se pudo cargar la fuente PGF\n");
+        printf("ERROR: Asegúrate de que vita2d_init() se haya llamado antes\n");
+        free(m);
+        return NULL;
+    }
     
     return (ui_manager_t*)m;
 }
